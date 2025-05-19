@@ -138,8 +138,20 @@ export const ProductProvider = ({ children }) => {
   const addProduct = (newProduct) => {
     setProducts([...products, { ...newProduct, id: products.length + 1 }]);
   };
+  
+  const updateProduct = (updatedProduct) => {
+    setProducts(products.map(product => {
+      if (product.id === updatedProduct.id) {
+        return {
+          ...updatedProduct
+        };
+      }
+      return product;
+    }));
+  };
 
-  const value = { products, filteredProducts, isLoading, categories, locations, addProduct, searchQuery, setSearchQuery, categoryFilter, setCategoryFilter, locationFilter, setLocationFilter, stockLevelFilter, setStockLevelFilter, batchFilter, setBatchFilter, expiryFilter, setExpiryFilter, sortBy, setSortBy, sortDirection, setSortDirection };
+  const value = { products, filteredProducts, isLoading, categories, locations, addProduct, updateProduct,
+    searchQuery, setSearchQuery, categoryFilter, setCategoryFilter, locationFilter, setLocationFilter, stockLevelFilter, setStockLevelFilter, batchFilter, setBatchFilter, expiryFilter, setExpiryFilter, sortBy, setSortBy, sortDirection, setSortDirection };
   
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;
 };

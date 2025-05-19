@@ -18,8 +18,10 @@ const PackageIcon = getIcon('package');
 const MapPinIcon = getIcon('map-pin');
 const CalendarIcon = getIcon('calendar');
 const BarChartIcon = getIcon('bar-chart');
+const PencilIcon = getIcon('pencil');
+const TrashIcon = getIcon('trash');
 
-const ProductList = () => {
+const ProductList = ({ onEditProduct }) => {
   const { 
     filteredProducts, 
     isLoading, 
@@ -365,6 +367,20 @@ const ProductList = () => {
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-surface-900 dark:text-white">{product.name}</div>
                       <div className="text-sm text-surface-500 dark:text-surface-400">{product.sku}</div>
+                    </td>
+                    <td className="px-2 py-2 whitespace-nowrap text-right">
+                      <div className="flex items-center space-x-2 justify-end">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditProduct(product);
+                          }}
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          title="Edit product"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">{product.batchNumber}</td>
                     <td className="px-4 py-4 whitespace-nowrap">
