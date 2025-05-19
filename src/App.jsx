@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { SupplierProvider } from './context/SupplierContext';
+import { ProductProvider } from './context/ProductContext';
 import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
@@ -27,23 +28,19 @@ function App() {
     }
   }, [isDarkMode]);
 
-import { ProductProvider } from './context/ProductContext';
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
 
   return (
     <SupplierProvider>
-      <>
-        
-        <ProductProvider>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/suppliers" element={<Suppliers />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </ProductProvider>
+      <ProductProvider>
+        <div className="fixed bottom-4 right-4 z-50">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-full bg-surface-100 dark:bg-surface-700 shadow-lg"
+            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
             {isDarkMode ? (
               <SunIcon className="w-5 h-5 text-yellow-400" />
             ) : (
@@ -51,7 +48,7 @@ import { ProductProvider } from './context/ProductContext';
             )}
           </button>
         </div>
-        
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/purchase-order/create" element={<PurchaseOrderWizard />} />
@@ -60,7 +57,7 @@ import { ProductProvider } from './context/ProductContext';
           <Route path="/orders" element={<Orders />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </>
+      </ProductProvider>
     </SupplierProvider>
   );
 }
