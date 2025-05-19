@@ -118,7 +118,7 @@ const ProductForm = ({ isOpen, onClose, product = null }) => {
   };
 
   const handleBatchSave = (batchData) => {
-    setFormData({
+  const handleBatchSave = async (batchData) => {
       ...formData,
       batchNumber: batchData.batchNumber,
       expiryDate: batchData.expiryDate
