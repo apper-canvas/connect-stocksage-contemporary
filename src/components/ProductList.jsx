@@ -20,6 +20,7 @@ const CalendarIcon = getIcon('calendar');
 const BarChartIcon = getIcon('bar-chart');
 const PencilIcon = getIcon('pencil');
 const EyeIcon = getIcon('eye');
+const PlusIcon = getIcon('plus');
 const TrashIcon = getIcon('trash');
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -101,6 +102,16 @@ const ProductList = ({ onEditProduct }) => {
             Product Inventory
           </h2>
           <div className="flex gap-2">
+            <button
+              onClick={() => onEditProduct({})}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white transition-colors"
+              aria-label="Add new product"
+            >
+              <PlusIcon className="h-5 w-5" />
+              <span className="hidden sm:inline">ADD NEW PRODUCT</span>
+              <span className="sm:hidden">ADD</span>
+            </button>
+            
             <button 
               onClick={toggleFilters}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 transition-colors ${
