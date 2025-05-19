@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import * as productService from '../../services/productService';
+import * as productService from '../../services/productService.js';
 
 const ProductContext = createContext();
 
