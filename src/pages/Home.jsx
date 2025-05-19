@@ -576,7 +576,7 @@ const Dashboard = () => {
                       </table>
                     )}
                   </div>
-                  </p>
+                  </div>
                 </div>
               )}
             </motion.div>
