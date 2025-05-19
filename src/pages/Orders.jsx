@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usePurchaseOrders } from '../context/PurchaseOrderContext';
+import { useSalesOrderContext } from '../context/SalesOrderContext';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
 
+const PlusIcon = getIcon('plus');
+const ArrowRightIcon = getIcon('arrow-right');
+const UsersIcon = getIcon('users');
 // Import icons
 const ArrowLeftIcon = getIcon('arrow-left');
 const SearchIcon = getIcon('search');
@@ -12,13 +16,32 @@ const FilterIcon = getIcon('filter');
 const SortAscIcon = getIcon('arrow-up');
 const SortDescIcon = getIcon('arrow-down');
 const ClipboardIcon = getIcon('clipboard-list');
+  const { salesOrders } = useSalesOrderContext();
 const ChevronDownIcon = getIcon('chevron-down');
+  const [activeTab, setActiveTab] = useState('purchase');
 const PlusIcon = getIcon('plus');
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  
+  useEffect(() => {
+    const orders = activeTab === 'purchase' ? purchaseOrders : salesOrders;
+    if (searchTerm.trim() === '') {
+      setFilteredOrders(orders);
+    } else {
+      const lowercasedSearch = searchTerm.toLowerCase();
+      setFilteredOrders(orders.filter(order => 
+        order.orderNumber.toLowerCase().includes(lowercasedSearch) ||
+        (activeTab === 'purchase' && order.supplier.name.toLowerCase().includes(lowercasedSearch)) ||
+        (activeTab === 'sales' && order.customer.name.toLowerCase().includes(lowercasedSearch)) ||
+        order.status.toLowerCase().includes(lowercasedSearch)
+      ));
+    }
+  }, [searchTerm, purchaseOrders, salesOrders, activeTab]);
 const EyeIcon = getIcon('eye');
-const EditIcon = getIcon('edit');
-const XIcon = getIcon('x');
-const BoxIcon = getIcon('box');
-const CalendarIcon = getIcon('calendar');
+  const getStatusClass = (status) => {
+    const statusClasses = {
+      'pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      'in-progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      'completed': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
 const TruckIcon = getIcon('truck');
 const UserIcon = getIcon('user');
 const DollarSignIcon = getIcon('dollar-sign');
@@ -36,7 +59,16 @@ const Orders = () => {
   const [statusNote, setStatusNote] = useState('');
   const [notification, setNotification] = useState({ visible: false, message: '', type: '' });
   
-  const [purchaseOrders, setPurchaseOrders] = useState([
+              <p className="text-surface-600 dark:text-surface-400">
+                Manage your orders
+              </p>
+            </div>
+            
+            <div className="flex">
+              <Link to={activeTab === 'purchase' ? '/purchase-order/create' : '/sales-order/create'} className="flex items-center bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md">
+                <PlusIcon className="w-4 h-4 mr-1" />
+                New {activeTab === 'purchase' ? 'Purchase' : 'Sales'} Order
+              </Link>
     { 
       id: "PO-2023-001", 
       supplier: "TechHub Distributors", 
@@ -52,24 +84,46 @@ const Orders = () => {
       contactPerson: "John Smith",
       contactEmail: "john@techhub.com",
       contactPhone: "(555) 123-4567",
+        {/* Order Type Tabs */}
+        <div className="border-b border-surface-200 dark:border-surface-700 mb-6">
+          <div className="flex space-x-8">
+            <button 
+              onClick={() => setActiveTab('purchase')}
+              className={`py-3 font-medium flex items-center ${activeTab === 'purchase' 
+                ? 'border-b-2 border-primary text-primary' 
+                : 'text-surface-600 dark:text-surface-400'}`}
+            >
+              <ClipboardIcon className="w-4 h-4 mr-2" />
+              Purchase Orders
+            </button>
+            <button 
+              onClick={() => setActiveTab('sales')}
+              className={`py-3 font-medium flex items-center ${activeTab === 'sales' 
+                ? 'border-b-2 border-primary text-primary' 
+                : 'text-surface-600 dark:text-surface-400'}`}
+            >
+              <UsersIcon className="w-4 h-4 mr-2" />
+              Sales Orders
+            </button>
+          </div>
+        </div>
+        
       deliveryAddress: "123 Warehouse Blvd, Storage City, SC 12345"
-    },
+        <div className="mb-6 flex justify-between items-center">
     { 
-      id: "PO-2023-002", 
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-surface-500 dark:text-surface-400">
       supplier: "Office Supplies Co", 
       items: [
-        { name: "Printer Paper", quantity: 50, price: 4.99 },
+            <input
         { name: "Ink Cartridges", quantity: 15, price: 24.99 },
         { name: "Staplers", quantity: 10, price: 8.99 }
       ],
       totalAmount: 1875.25, 
-      orderDate: "2023-08-20", 
+              placeholder={`Search ${activeTab === 'purchase' ? 'purchase' : 'sales'} orders...`}
       expectedDelivery: "2023-09-02", 
       status: "in-transit",
       contactPerson: "Sarah Johnson",
       contactEmail: "sarah@officesupplies.com",
-      contactPhone: "(555) 987-6543",
-      deliveryAddress: "456 Office Park, Business District, BD 54321"
     },
     { 
       id: "PO-2023-003", 
@@ -77,7 +131,7 @@ const Orders = () => {
       items: [
         { name: "Bluetooth Speakers", quantity: 8, price: 69.99 },
         { name: "HDMI Cables", quantity: 15, price: 14.99 },
-        { name: "Wireless Chargers", quantity: 12, price: 29.99 }
+                  <th className="px-6 py-3 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">{activeTab === 'purchase' ? 'Supplier' : 'Customer'}</th>
       ],
       totalAmount: 4325.50, 
       orderDate: "2023-09-01", 
@@ -86,27 +140,41 @@ const Orders = () => {
       contactPerson: "Michael Chen",
       contactEmail: "michael@qualityelectronics.com",
       contactPhone: "(555) 456-7890",
-      deliveryAddress: "789 Tech Street, Innovation City, IC 98765"
-    },
-    { 
+                {filteredOrders.length > 0 ? filteredOrders.map(order => (
+                    <tr 
+                      key={order.id} 
+                      className="hover:bg-surface-50 dark:hover:bg-surface-900 cursor-pointer"
+                      onClick={() => navigate(activeTab === 'purchase' ? `/purchase-order/${order.id}` : `/sales-order/${order.id}`)}
+                    >
       id: "PO-2023-004", 
-      supplier: "Furniture Plus", 
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {activeTab === 'purchase' ? order.supplier.name : order.customer.name}
+                      </td>
       items: [
         { name: "Office Chairs", quantity: 5, price: 129.99 },
-        { name: "Desks", quantity: 3, price: 249.99 },
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(order.status)}`}
+>
         { name: "Filing Cabinets", quantity: 2, price: 89.99 }
       ],
       totalAmount: 1879.90, 
-      orderDate: "2023-09-05", 
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        ${typeof order.totalAmount === 'number' ? order.totalAmount.toFixed(2) : order.totalAmount}
+                      </td>
       expectedDelivery: "2023-09-25", 
-      status: "processing",
+                        <button className="text-primary hover:text-primary-dark inline-flex items-center">
+                          View 
+                          <ArrowRightIcon className="w-4 h-4 ml-1" />
+                        </button>
       contactPerson: "Lisa Rodriguez",
       contactEmail: "lisa@furnitureplus.com",
-      contactPhone: "(555) 789-0123",
-      deliveryAddress: "321 Comfort Road, Furnishing Town, FT 45678"
+                )) : (
     },
     { 
-      id: "PO-2023-005", 
+                      {searchTerm 
+                        ? 'No matching orders found.' 
+                        : activeTab === 'purchase' 
+                          ? 'No purchase orders found. Create your first purchase order!' 
+                          : 'No sales orders found. Create your first sales order!'}
       supplier: "Digital Solutions", 
       items: [
         { name: "USB Flash Drives", quantity: 25, price: 12.99 },

@@ -89,7 +89,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (contextOrders && contextOrders.length > 0) {
       // Get the most recent orders
-      const sortedOrders = [...contextOrders].sort((a, b) => {
+                  <Link to="/sales-order/create" className="mt-auto text-primary hover:text-primary-dark">
         return new Date(b.orderDate) - new Date(a.orderDate);
       });
       setRecentOrders(sortedOrders.slice(0, 3));
