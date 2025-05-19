@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 
 // Icons
@@ -193,7 +192,6 @@ const ProductExpiryReport = () => {
                 setIsLoading(true);
                 setTimeout(() => {
                   setIsLoading(false);
-                  toast.success('Report refreshed');
                 }, 500);
               }}
               className="h-9 self-end px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors flex items-center gap-2"
