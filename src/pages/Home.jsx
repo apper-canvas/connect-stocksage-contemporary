@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify'; 
 import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
+import { useSuppliers } from '../context/SupplierContext';
 
 // Define icons using getIcon utility
 const BarChart3Icon = getIcon('bar-chart-3');
@@ -24,10 +26,13 @@ const HashIcon = getIcon('hash');
 const ClockIcon = getIcon('clock');
 const PlusIcon = getIcon('plus');
 const FileTextIcon = getIcon('file-text');
+const ExternalLinkIcon = getIcon('external-link');
+const BuildingIcon = getIcon('building');
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
+  const { suppliers, isLoading } = useSuppliers();
 
   // Sample data for the dashboard overview
   const overview = [
@@ -87,6 +92,10 @@ const Dashboard = () => {
 
   const navigateToExpiryReport = () => {
     window.location.href = '/reports/product-expiry';
+  };
+
+  const navigateToSuppliers = () => {
+    window.location.href = '/suppliers';
   };
 
   // Sample product data with batch and expiry for the inventory tab
@@ -485,18 +494,88 @@ const Dashboard = () => {
               )}
               
               {activeTab === 'suppliers' && (
-                <div className="glass-card">
+                <div className="space-y-6">
+                  <div className="glass-card">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold text-surface-900 dark:text-white">
                       Supplier Management
                     </h2>
-                    <button className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                      Add Supplier
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={navigateToSuppliers}
+                        className="bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-900 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        <ExternalLinkIcon className="h-5 w-5" />
+                        <span>View All</span>
+                      </button>
+                      <Link
+                        to="/suppliers"
+                        className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        <PlusIcon className="h-5 w-5" />
+                        <span>Add Supplier</span>
+                      </Link>
+                    </div>
                   </div>
                   
-                  <p className="text-surface-600 dark:text-surface-300 pb-4 border-b border-surface-200 dark:border-surface-700">
-                    This feature will be available in the full version. You can manage supplier information, track performance, and maintain contact details here.
+                  <div className="overflow-x-auto">
+                    {isLoading ? (
+                      <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+                      </div>
+                    ) : suppliers.length === 0 ? (
+                      <div className="text-center py-10 border border-dashed border-surface-300 dark:border-surface-600 rounded-lg">
+                        <BuildingIcon className="h-12 w-12 mx-auto text-surface-400 dark:text-surface-500 mb-3" />
+                        <h3 className="text-lg font-medium text-surface-900 dark:text-white mb-1">No suppliers found</h3>
+                        <p className="text-surface-600 dark:text-surface-400 mb-4">
+                          You haven't added any suppliers yet
+                        </p>
+                        <Link
+                          to="/suppliers"
+                          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg"
+                        >
+                          <PlusIcon className="h-5 w-5" />
+                          <span>Add Your First Supplier</span>
+                        </Link>
+                      </div>
+                    ) : (
+                      <table className="min-w-full divide-y divide-surface-200 dark:divide-surface-700">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Supplier Name
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Contact Person
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Categories
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Status
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
+                          {suppliers.slice(0, 3).map(supplier => (
+                            <tr key={supplier.id} className="hover:bg-surface-50 dark:hover:bg-surface-700">
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-surface-900 dark:text-white">{supplier.name}</div>
+                                <div className="text-sm text-surface-500 dark:text-surface-400">{supplier.email}</div>
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">{supplier.contactPerson}</td>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                {supplier.categories.map(category => (
+                                  <span key={category} className="inline-block px-2 py-1 text-xs font-medium bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-full mr-1">{category}</span>
+                                ))}
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap text-sm"><span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${supplier.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>{supplier.status}</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
                   </p>
                 </div>
               )}
