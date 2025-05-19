@@ -35,10 +35,10 @@ export const ProductProvider = ({ children }) => {
   const [sortDirection, setSortDirection] = useState('asc');
 
   // Get unique categories from products
-  const categories = [...new Set(products.map(product => product.category))];
+  const categories = [...new Set(products?.filter(product => product && product.category).map(product => product.category) || [])];
   
   // Get unique locations from products
-  const locations = [...new Set(products.map(product => product.location))];
+  const locations = [...new Set(products?.filter(product => product && product.location).map(product => product.location) || [])];
 
   // Apply filters and sorting when any filter changes
   useEffect(() => {
@@ -166,8 +166,8 @@ export const ProductProvider = ({ children }) => {
       setIsLoading(true);
       try {
         const data = await productService.fetchProducts();
-        setProducts(data);
-        setFilteredProducts(data);
+        setProducts(data || []);
+        setFilteredProducts(data || []);
       } catch (error) {
         console.error("Error loading products:", error);
         toast.error("Failed to load products");
