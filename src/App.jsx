@@ -27,6 +27,7 @@ function App() {
     }
   }, [isDarkMode]);
 
+import { ProductProvider } from './context/ProductContext';
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
@@ -35,12 +36,14 @@ function App() {
     <SupplierProvider>
       <>
         
-        <div className="fixed top-4 right-4 z-50">
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors"
-            aria-label="Toggle dark mode"
-          >
+        <ProductProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/suppliers" element={<Suppliers />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ProductProvider>
             {isDarkMode ? (
               <SunIcon className="w-5 h-5 text-yellow-400" />
             ) : (

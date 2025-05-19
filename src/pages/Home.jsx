@@ -5,6 +5,7 @@ import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
 import { useSuppliers } from '../context/SupplierContext';
 import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
+import ProductList from '../components/ProductList';
 import ProductBatchModel from '../components/ProductBatchModel';
 
 // Define icons using getIcon utility
@@ -36,7 +37,6 @@ const Dashboard = () => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
-  const { suppliers, isLoading } = useSuppliers();
 
   // Sample data for the dashboard overview
   const overview = [
@@ -81,6 +81,7 @@ const Dashboard = () => {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
+  const { suppliers, isLoading } = useSuppliers();
   
   const toggleProductModal = () => {
     setIsProductModalOpen(!isProductModalOpen);
@@ -105,25 +106,6 @@ const Dashboard = () => {
     window.location.href = '/suppliers';
   };
 
-  // Sample product data with batch and expiry for the inventory tab
-  const products = [
-    { id: 1, name: 'Wireless Headphones', sku: 'WH-101', category: 'Electronics', stock: 45, batchNumber: 'BT-20230801', expiryDate: '2024-02-15', location: 'Warehouse A' },
-    { id: 2, name: 'Smartphone Charger', sku: 'SC-202', category: 'Electronics', stock: 120, batchNumber: 'BT-20230715', expiryDate: '2025-07-10', location: 'Warehouse A' },
-    { id: 3, name: 'Laptop Sleeve', sku: 'LS-303', category: 'Accessories', stock: 18, batchNumber: 'BT-20220512', expiryDate: '2023-12-01', location: 'Warehouse B' },
-    { id: 4, name: 'Bluetooth Speaker', sku: 'BS-404', category: 'Electronics', stock: 32, batchNumber: 'BT-20230610', expiryDate: '2024-01-05', location: 'Warehouse B' },
-    { id: 5, name: 'HDMI Cable', sku: 'HC-505', category: 'Accessories', stock: 64, batchNumber: 'BT-20230420', expiryDate: '2026-04-20', location: 'Warehouse C' },
-  ];
-
-  // State for inventory filtering and sorting
-  const [batchFilter, setBatchFilter] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [sortDirection, setSortDirection] = useState('asc');
-  
-  const [productsList, setProductsList] = useState(products);
-  
-  const handleAddProduct = (newProduct) => {
-    setProductsList([...productsList, {...newProduct, id: productsList.length + 1}]);
-  };
   
   // Sample purchase orders data
   const purchaseOrders = [
@@ -283,246 +265,29 @@ const Dashboard = () => {
 
               {activeTab === 'inventory' && (
                 <>
-                  <div className="glass-card mb-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-xl font-semibold text-surface-900 dark:text-white">
-                        Product Inventory
-                      </h2>
-                      <div className="flex gap-2">
-                        <button onClick={toggleProductModal} className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-                          <PlusIcon className="h-5 w-5" />
-                          <span>Add Product</span>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row gap-4 mb-6">
-                      <div className="relative flex-1">
-                        <SearchIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-surface-400" />
-                        <input
-                          type="text"
-                          placeholder="Search products by name, SKU, or batch number..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <HashIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-surface-400" />
-                        <input
-                          type="text"
-                          placeholder="Filter by batch #"
-                          value={batchFilter}
-                          onChange={(e) => setBatchFilter(e.target.value)}
-                          className="w-full md:w-48 pl-10 pr-4 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <select
-                          value={sortBy}
-                          onChange={(e) => setSortBy(e.target.value)}
-                          className="appearance-none w-full md:w-48 pl-10 pr-4 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
-                        >
-                          <option value="name">Sort by Name</option>
-                          <option value="sku">Sort by SKU</option>
-                          <option value="stock">Sort by Stock</option>
-                          <option value="expiryDate">Sort by Expiry Date</option>
-                        </select>
-                        <FilterIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-surface-400" />
-                        <ChevronDownIcon className="h-5 w-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-surface-400" />
-                      </div>
-                      
-                      <button
-                        onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                        className="px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-300"
-                      >
-                        {sortDirection === 'asc' ? (
-                          <SortAscIcon className="h-5 w-5" />
-                        ) : (
-                          <SortDescIcon className="h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                    
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-surface-200 dark:divide-surface-700">
-                        <thead>
-                          <tr>
-                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
-                              Product
-                            </th>
-                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
-                              Batch #
-                            </th>
-                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
-                              Expiry Date
-                            </th>
-                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
-                              Stock
-                            </th>
-                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
-                              Location
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
-                        {productsList
-                            .filter(product => 
-                              (product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              product.batchNumber.toLowerCase().includes(searchQuery.toLowerCase())) &&
-                              product.batchNumber.toLowerCase().includes(batchFilter.toLowerCase())
-                            )
-                            .sort((a, b) => {
-                              let first = a[sortBy];
-                              let second = b[sortBy];
-                              
-                              if (sortBy === 'expiryDate') {
-                                first = new Date(first);
-                                second = new Date(second);
-                              }
-                              
-                              if (sortDirection === 'asc') {
-                                return first > second ? 1 : -1;
-                              } else {
-                                return first < second ? 1 : -1;
-                              }
-                            })
-                            .map(product => {
-                              const isExpired = new Date(product.expiryDate) < new Date();
-                              const isNearExpiry = !isExpired && (new Date(product.expiryDate) - new Date()) / (1000 * 60 * 60 * 24) < 30;
-                              
-                              return (
-                                <tr key={product.id} className="hover:bg-surface-50 dark:hover:bg-surface-700">
-                                  <td className="px-4 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-surface-900 dark:text-white">{product.name}</div>
-                                    <div className="text-sm text-surface-500 dark:text-surface-400">{product.sku}</div>
-                                  </td>
-                                  <td className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">{product.batchNumber}</td>
-                                  <td className="px-4 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                      isExpired 
-                                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' 
-                                        : isNearExpiry
-                                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                          : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                    }`}>
-                                      {isExpired ? (
-                                        <>
-                                          <AlertCircleIcon className="h-3 w-3" />
-                                          Expired
-                                        </>
-                                      ) : isNearExpiry ? (
-                                        <>
-                                          <ClockIcon className="h-3 w-3" />
-                                          {new Date(product.expiryDate).toLocaleDateString()}
-                                        </>
-                                      ) : (
-                                        new Date(product.expiryDate).toLocaleDateString()
-                                      )}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">{product.stock} units</td>
-                                  <td className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">{product.location}</td>
-                                </tr>
-                              );
-                            })
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                  {/* Main product list with filters */}
+                  <ProductList />
                   
-                  <div className="glass-card">
-                    <div className="flex justify-between items-center mb-6">
-                      <div className="flex items-center">
-                        <CalendarIcon className="h-6 w-6 text-orange-500 mr-2" />
-                        <h2 className="text-xl font-semibold text-surface-900 dark:text-white">
-                          Products Approaching Expiry
-                        </h2>
-                      </div>
-                      <button
-                        onClick={navigateToExpiryReport}
-                        className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
-                      >
-                        <FileTextIcon className="h-5 w-5" />
-                        <span>View Full Report</span>
-                      </button>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {productsList
-                        .filter(product => {
-                          const expiryDate = new Date(product.expiryDate);
-                          const today = new Date();
-                          const daysUntilExpiry = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
-                          return daysUntilExpiry <= 90 && daysUntilExpiry > -30; // Show recently expired and soon to expire
-                        })
-                        .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
-                        .slice(0, 3)
-                        .map(product => {
-                          const expiryDate = new Date(product.expiryDate);
-                          const today = new Date();
-                          const daysUntilExpiry = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
-                          const isExpired = daysUntilExpiry < 0;
-                          
-                          return (
-                            <div key={product.id} className="border border-surface-200 dark:border-surface-700 rounded-lg p-4 bg-white dark:bg-surface-800">
-                              <div className="flex justify-between items-start mb-3">
-                                <div>
-                                  <h3 className="font-semibold text-surface-900 dark:text-white">{product.name}</h3>
-                                  <p className="text-sm text-surface-500 dark:text-surface-400">{product.sku}</p>
-                                </div>
-                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  isExpired 
-                                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' 
-                                    : daysUntilExpiry <= 30
-                                      ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-                                      : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                }`}>
-                                  {isExpired 
-                                    ? 'Expired' 
-                                    : daysUntilExpiry === 0
-                                      ? 'Expires Today'
-                                      : `${daysUntilExpiry} days left`}
-                                </span>
-                              </div>
-                              
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-surface-600 dark:text-surface-400">Batch:</span>
-                                  <span className="text-surface-900 dark:text-white">{product.batchNumber}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-surface-600 dark:text-surface-400">Expiry Date:</span>
-                                  <span className="text-surface-900 dark:text-white">{expiryDate.toLocaleDateString()}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-surface-600 dark:text-surface-400">Stock Remaining:</span>
-                                  <span className="text-surface-900 dark:text-white">{product.stock} units</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-surface-600 dark:text-surface-400">Location:</span>
-                                  <span className="text-surface-900 dark:text-white">{product.location}</span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      }
-                    </div>
+                  <div className="flex justify-end mb-6">
+                    <button onClick={toggleProductModal} className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                      <PlusIcon className="h-5 w-5" />
+                      <span>Add New Product</span>
+                    </button>
                   </div>
                 </>
-              )}
-              
-              {/* Product Form Modal */}
+              )}              
+
+              {/* Reuse existing product form modal */}
               {isProductModalOpen && (
                 <ProductForm 
                   isOpen={isProductModalOpen} 
                   onClose={toggleProductModal} 
-                  onSave={handleAddProduct}
+                  onSave={(newProduct) => {
+                    // This will be handled by ProductContext now
+                    const { addProduct } = useProducts();
+                    addProduct(newProduct);
+                    toggleProductModal();
+                  }}
                   categories={['Electronics', 'Accessories', 'Storage', 'Cables', 'Audio', 'Video', 'Computer Parts']}
                 />
               )}

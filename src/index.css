@@ -83,4 +83,27 @@ body {
     opacity: 0;
     transition: opacity 300ms;
   }
+
+  /* Filter Pills */
+  .filter-pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm transition-colors cursor-pointer;
+  }
+  
+  .filter-pill-primary {
+    @apply bg-primary/10 text-primary dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30;
+  }
+  
+  .filter-pill-green {
+    @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50;
+  }
+  
+  .filter-pill-blue {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50;
+  }
+  
+  .filter-pill.active {
+    @apply bg-primary text-white dark:bg-primary-dark;
+  }
+  
+  /* End of Filter Pills */
 }
