@@ -103,24 +103,25 @@ const MainFeature = () => {
     // Validate batch number and expiry date for products with expiry
     if (selectedProductData?.hasExpiry && transactionType === 'stock-in') {
       if (!batchNumber.trim()) {
-        toast.error('Please enter a batch number for this product');
+        alert('Please enter a batch number for this product');
         return;
       }
       
       if (!expiryDate) {
-        toast.error('Please specify an expiry date for this product');
+        alert('Please specify an expiry date for this product');
         return;
       }
       
       if (new Date(expiryDate) <= new Date()) {
-         return; // Expiry date must be in the future
+        alert('Expiry date must be in the future');
       }
     }
     
     setIsLoading(true);
     
     // Simulate API call
-    setTimeout(() => {      const newTransaction = {        id: `txn-${Math.floor(Math.random() * 1000)}`,
+    setTimeout(() => {      
+      const newTransaction = {        id: `txn-${Math.floor(Math.random() * 1000)}`,
         date: new Date().toISOString(),
         type: transactionType,
         productId: selectedProduct,
@@ -147,6 +148,7 @@ const MainFeature = () => {
     // Show confirmation dialog
     if (window.confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
       setTransactions(prev => prev.filter(transaction => transaction.id !== id));
+    }
   };
   
   // Get product name by ID
@@ -401,9 +403,6 @@ const MainFeature = () => {
           {transactions.length === 0 && (
             <button 
               onClick={() => {
-                toast.info('Data refreshed', {
-                  icon: () => <RefreshCcwIcon className="h-5 w-5 text-blue-500" />
-                });
               }}
               className="p-2 rounded-lg bg-surface-100 hover:bg-surface-200 dark:bg-surface-700 dark:hover:bg-surface-600 text-surface-600 dark:text-surface-300"
             >
