@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import * as salesOrderService from '../../services/salesOrderService';
+import * as salesOrderService from '../services/salesOrderService';
 import { useProducts } from './ProductContext';
 
 // Create context
