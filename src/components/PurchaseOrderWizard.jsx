@@ -6,6 +6,8 @@ import { usePurchaseOrders } from '../context/PurchaseOrderContext';
 import PurchaseOrderStatusBadge from './PurchaseOrderStatusBadge';
 
 // Icons
+
+// Icons
 const ArrowLeftIcon = getIcon('arrow-left');
 const ArrowRightIcon = getIcon('arrow-right');
 const CheckIcon = getIcon('check');
@@ -25,6 +27,8 @@ const LoaderIcon = getIcon('loader');
 const DollarSignIcon = getIcon('dollar-sign');
 const ChevronLeftIcon = getIcon('chevron-left');
 const ChevronRightIcon = getIcon('chevron-right');
+const EyeIcon = getIcon('eye');
+const AlertCircleIcon = getIcon('alert-circle');
 
 const PurchaseOrderWizard = () => {
   // Wizard state management
@@ -912,7 +916,6 @@ const PurchaseOrderWizard = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link
                 <Link to={`/purchase-order/${orderNumber}`} className="py-2 px-4 rounded-lg bg-primary hover:bg-primary-dark text-white transition-colors flex items-center justify-center gap-2">
                   <EyeIcon className="h-4 w-4" />
                   <span>View Order Details</span>
