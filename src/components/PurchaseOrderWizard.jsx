@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 import PurchaseOrderStatusBadge from './PurchaseOrderStatusBadge';
 
@@ -164,8 +163,6 @@ const PurchaseOrderWizard = () => {
       supplierId: supplier.id,
       supplierName: supplier.name
     }));
-    
-    toast.success(`Selected supplier: ${supplier.name}`);
   };
   
   // Handle adding product to order
@@ -181,7 +178,6 @@ const PurchaseOrderWizard = () => {
             : item
         )
       }));
-      toast.info(`Increased quantity for ${product.name}`);
     } else {
       setFormData(prev => ({
         ...prev,
@@ -194,7 +190,6 @@ const PurchaseOrderWizard = () => {
           quantity: 1 
         }]
       }));
-      toast.success(`Added ${product.name} to order`);
     }
   };
   
@@ -204,9 +199,6 @@ const PurchaseOrderWizard = () => {
       ...prev,
       items: prev.items.filter(item => item.id !== productId)
     }));
-    
-    const productName = formData.items.find(item => item.id === productId)?.name;
-    toast.error(`Removed ${productName} from order`);
   };
   
   // Handle quantity change for a product
@@ -246,17 +238,17 @@ const PurchaseOrderWizard = () => {
   const goToNextStep = () => {
     // Validate current step
     if (currentStep === 0 && !formData.supplierId) {
-      toast.error('Please select a supplier first');
+      alert('Please select a supplier first');
       return;
     }
     
     if (currentStep === 1 && formData.items.length === 0) {
-      toast.error('Please add at least one product to your order');
+      alert('Please add at least one product to your order');
       return;
     }
     
     if (currentStep === 2 && !formData.expectedDeliveryDate) {
-      toast.error('Please specify an expected delivery date');
+      alert('Please specify an expected delivery date');
       return;
     }
     
@@ -283,10 +275,6 @@ const PurchaseOrderWizard = () => {
         ...prev,
         status: 'pending'
       }));
-      
-      toast.success(`Purchase order ${newOrderNumber} has been created successfully!`, {
-        icon: () => <CheckIcon className="h-5 w-5 text-green-500" />
-      });
     }, 1500);
   };
   
@@ -861,11 +849,7 @@ const PurchaseOrderWizard = () => {
                 </Link>
                 
                 <button
-                  onClick={() => {
-                    toast.success("Purchase order details sent to your email!");
-                  }}
-                  className="py-2 px-4 rounded-lg bg-primary hover:bg-primary-dark text-white transition-colors flex items-center justify-center gap-2"
-                >
+                  onClick={() => alert("Purchase order details sent to your email!")} className="py-2 px-4 rounded-lg bg-primary hover:bg-primary-dark text-white transition-colors flex items-center justify-center gap-2">
                   <MailIcon className="h-4 w-4" />
                   <span>Email Order Details</span>
                 </button>

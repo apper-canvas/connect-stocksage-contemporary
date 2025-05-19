@@ -1,5 +1,4 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { toast } from 'react-toastify';
 
 // Create context
 const SupplierContext = createContext();
@@ -58,7 +57,6 @@ export const SupplierProvider = ({ children }) => {
         setError(null);
       } catch (err) {
         setError('Failed to fetch suppliers');
-        toast.error('Failed to load supplier data');
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +73,6 @@ export const SupplierProvider = ({ children }) => {
       status: 'active'
     };
     setSuppliers(prev => [...prev, newSupplier]);
-    toast.success(`Supplier ${supplier.name} added successfully`);
     return newSupplier;
   };
 
