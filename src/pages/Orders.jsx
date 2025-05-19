@@ -84,43 +84,7 @@ const Orders = () => {
   };
             
   /* Removed sample data that was mixed in the component */
-  
-      id: "PO-2023-001", 
-      supplier: "TechHub Distributors", 
-      items: [
-        { name: "Wireless Headphones", quantity: 5, price: 89.99 },
-        { name: "USB-C Cables", quantity: 20, price: 12.99 },
-        { name: "Power Banks", quantity: 10, price: 45.99 }
-      ],
-      totalAmount: 5240.80, 
-      orderDate: "2023-08-15", 
-      expectedDelivery: "2023-08-22", 
-      status: "delivered",
-      contactPerson: "John Smith",
-      contactEmail: "john@techhub.com",
-          </div>
-        </div>
-        
-      deliveryAddress: "123 Warehouse Blvd, Storage City, SC 12345"
-        <div className="mb-6 flex justify-between items-center">
-    { 
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-surface-500 dark:text-surface-400">
-      supplier: "Office Supplies Co", 
-      items: [
-            <input
-        { name: "Ink Cartridges", quantity: 15, price: 24.99 },
-        { name: "Staplers", quantity: 10, price: 8.99 }
-      ],
-      totalAmount: 1875.25, 
-              placeholder={`Search ${activeTab === 'purchase' ? 'purchase' : 'sales'} orders...`}
-      expectedDelivery: "2023-09-02", 
-      status: "in-transit",
-      contactPerson: "Sarah Johnson",
-      contactEmail: "sarah@officesupplies.com",
-    },
-    { 
-      id: "PO-2023-003", 
-      supplier: "Quality Electronics", 
+
       items: [
         { name: "Bluetooth Speakers", quantity: 8, price: 69.99 },
         { name: "HDMI Cables", quantity: 15, price: 14.99 },
@@ -184,43 +148,10 @@ const Orders = () => {
     }
   ]);
   
-  // Get purchase orders from context
-  const { purchaseOrders: contextOrders, updateOrderStatus } = usePurchaseOrders();
-
   // Update orders when context changes
   useEffect(() => {
-    setPurchaseOrders(contextOrders);
-  }, [contextOrders]);
-  
-  const filteredOrders = purchaseOrders
-    .filter(order => {
-      // Filter by search query
-      const matchesSearch = 
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.supplier.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Filter by status
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      // Sort orders
-      let comparison = 0;
-      
-      if (sortBy === 'orderDate') {
-        comparison = new Date(a.orderDate) - new Date(b.orderDate);
-      } else if (sortBy === 'expectedDelivery') {
-        comparison = new Date(a.expectedDelivery) - new Date(b.expectedDelivery);
-      } else if (sortBy === 'totalAmount') {
-        comparison = a.totalAmount - b.totalAmount;
-      } else if (sortBy === 'id') {
-        comparison = a.id.localeCompare(b.id);
-      } else if (sortBy === 'supplier') {
-        comparison = a.supplier.localeCompare(b.supplier);
-      }
-      
-      return sortDirection === 'asc' ? comparison : -comparison;
+    // Use purchaseOrders from context
+    setPurchaseOrders(purchaseOrders);
     });
 
   const handleOpenOrderDetails = (order, event) => {
@@ -265,7 +196,6 @@ const Orders = () => {
       } catch (error) {
         showNotification('Failed to update order status', 'error');
       }
-      setPurchaseOrders(updatedOrders);
       setSelectedOrder({ ...selectedOrder, status: newStatus });
       setIsEditingStatus(false);
     }
@@ -512,7 +442,7 @@ const Orders = () => {
                           </button>
                           <button
                             onClick={() => {
-                              handleOpenOrderDetails(order, event);
+                              handleOpenOrderDetails(order);
                               setIsEditingStatus(true);
                               setNewStatus(order.status);
                               setStatusNote('');
