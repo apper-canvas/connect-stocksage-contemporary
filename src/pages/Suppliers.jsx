@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import { useSuppliers } from '../context/SupplierContext';
@@ -84,21 +83,18 @@ const Suppliers = () => {
   const handleAddSupplier = (supplierData) => {
     addSupplier(supplierData);
     setShowAddModal(false);
-    toast.success(`Supplier ${supplierData.name} added successfully!`);
   };
   
   const handleEditSupplier = (updatedSupplier) => {
     // In a real app, this would call an API to update the supplier
     // For this example, we'll just show a success toast
     setShowEditModal(false);
-    toast.success(`Supplier ${updatedSupplier.name} updated successfully!`);
   };
   
   const handleDeleteSupplier = () => {
     // In a real app, this would call an API to delete the supplier
     // For this example, we'll just show a success toast
     setShowDeleteModal(false);
-    toast.success(`Supplier ${selectedSupplier.name} deleted successfully!`);
   };
   
   const openViewModal = (supplier) => {

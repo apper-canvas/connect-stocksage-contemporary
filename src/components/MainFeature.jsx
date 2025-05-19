@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 
 // Define icons using getIcon utility
@@ -90,17 +89,17 @@ const MainFeature = () => {
     e.preventDefault();
     
     if (!selectedProduct) {
-      toast.error('Please select a product');
-      return;
+       return;
     }
     
     if (quantity <= 0) {
-      toast.error('Quantity must be greater than 0');
+      // Quantity must be greater than 0
       return;
     }
     
     const selectedProductData = products.find(p => p.id === selectedProduct);
     
+    // Check if we need to validate batch number and expiry date
     // Validate batch number and expiry date for products with expiry
     if (selectedProductData?.hasExpiry && transactionType === 'stock-in') {
       if (!batchNumber.trim()) {
@@ -114,17 +113,14 @@ const MainFeature = () => {
       }
       
       if (new Date(expiryDate) <= new Date()) {
-        toast.error('Expiry date must be in the future');
-        return;
+         return; // Expiry date must be in the future
       }
     }
     
     setIsLoading(true);
     
     // Simulate API call
-    setTimeout(() => {
-      const newTransaction = {
-        id: `txn-${Math.floor(Math.random() * 1000)}`,
+    setTimeout(() => {      const newTransaction = {        id: `txn-${Math.floor(Math.random() * 1000)}`,
         date: new Date().toISOString(),
         type: transactionType,
         productId: selectedProduct,
@@ -135,11 +131,6 @@ const MainFeature = () => {
       };
       
       setTransactions(prev => [newTransaction, ...prev]);
-      
-      // Success notification
-      toast.success(`Transaction recorded successfully`, {
-        icon: () => <CheckIcon className="h-5 w-5 text-green-500" />
-      });
       
       // Reset form
       setSelectedProduct('');
@@ -156,11 +147,6 @@ const MainFeature = () => {
     // Show confirmation dialog
     if (window.confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
       setTransactions(prev => prev.filter(transaction => transaction.id !== id));
-      
-      toast.success('Transaction deleted successfully', {
-        icon: () => <TrashIcon className="h-5 w-5 text-red-500" />
-      });
-    }
   };
   
   // Get product name by ID
@@ -444,10 +430,6 @@ const MainFeature = () => {
             </p>
             <button
               onClick={() => {
-                toast.info('Let\'s add some sample data', {
-                  icon: () => <WarningIcon className="h-5 w-5 text-blue-500" />
-                });
-                
                 // Simulate getting sample data
                 setTimeout(() => {
                   setTransactions([
@@ -476,8 +458,6 @@ const MainFeature = () => {
                       description: 'Inventory count correction'
                     }
                   ]);
-                  
-                  toast.success('Sample transactions loaded!');
                 }, 1000);
               }}
               className="bg-surface-100 hover:bg-surface-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 font-medium py-2 px-4 rounded-lg transition-colors"

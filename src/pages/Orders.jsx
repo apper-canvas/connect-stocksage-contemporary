@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
@@ -182,8 +181,6 @@ const Orders = () => {
       setPurchaseOrders(updatedOrders);
       setSelectedOrder({ ...selectedOrder, status: newStatus });
       setIsEditingStatus(false);
-      
-      toast.success(`Order ${selectedOrder.id} status updated to ${newStatus}`);
     }
   };
 

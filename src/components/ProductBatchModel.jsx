@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 
 // Icons
@@ -42,10 +41,6 @@ const ProductBatchModel = ({ onSave, onCancel, initialData = {} }) => {
         batchNumber: batchNumber.trim(),
         expiryDate
       });
-      
-      toast.success('Batch information saved successfully');
-    } else {
-      toast.error('Please correct the errors before saving');
     }
   };
 

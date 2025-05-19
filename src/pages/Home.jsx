@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify'; 
 import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
 import { useSuppliers } from '../context/SupplierContext';
@@ -79,14 +78,6 @@ const Dashboard = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    toast.info(`Navigated to ${tab.charAt(0).toUpperCase() + tab.slice(1)}`, {
-      icon: () => {
-        const TabIcon = getIcon(tab === 'dashboard' ? 'layout-dashboard' : 
-                            tab === 'inventory' ? 'package' : 
-                            tab === 'orders' ? 'clipboard-list' : 'users');
-        return <TabIcon className="h-5 w-5" />;
-      }
-    });
   };
   
   const navigateToPurchaseOrderWizard = () => {
@@ -102,7 +93,6 @@ const Dashboard = () => {
   };
   
   const viewOrderDetails = (orderId) => {
-    toast.info(`Viewing details for Order #${orderId}`);
   };
 
   const navigateToSuppliers = () => {

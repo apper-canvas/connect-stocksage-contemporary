@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { SupplierProvider } from './context/SupplierContext';
 import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
@@ -36,19 +34,6 @@ function App() {
   return (
     <SupplierProvider>
       <>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme={isDarkMode ? "dark" : "light"}
-          className="mt-16"
-        />
         
         <div className="fixed top-4 right-4 z-50">
           <button
