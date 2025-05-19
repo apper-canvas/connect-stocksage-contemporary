@@ -100,6 +100,7 @@ const Dashboard = () => {
       setOverview(prev => prev.map(item => {
         return item.id === 3 ? { ...item, value: pendingCount } : item;
       }));
+    }
   }, [contextOrders]);
 
   const handleTabChange = (tab) => {
