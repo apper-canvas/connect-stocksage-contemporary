@@ -8,7 +8,7 @@ import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
 
 // Import all icons used in the component
 const PlusIcon = getIcon('plus');
-const ArrowRightIcon = getIcon('arrow-right');
+const ArrowRightIcon = getIcon('arrow-right'); 
 const UsersIcon = getIcon('users');
 const ArrowLeftIcon = getIcon('arrow-left');
 const SearchIcon = getIcon('search');
@@ -19,7 +19,6 @@ const ClipboardIcon = getIcon('clipboard-list');
 const ChevronDownIcon = getIcon('chevron-down');
 const EyeIcon = getIcon('eye');
 const TruckIcon = getIcon('truck');
-const UserIcon = getIcon('user');
 const DollarSignIcon = getIcon('dollar-sign');
 const SaveIcon = getIcon('save');
 const EditIcon = getIcon('edit');
@@ -45,7 +44,6 @@ const Orders = () => {
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [statusNote, setStatusNote] = useState('');
-  const [purchaseOrdersData, setPurchaseOrders] = useState([]);
   const [notification, setNotification] = useState({ visible: false, message: '', type: '' });
   
   // Update filtered orders when tab, search term, or orders change
@@ -63,12 +61,7 @@ const Orders = () => {
       ));
     }
   }, [searchTerm, purchaseOrders, salesOrders, activeTab]);
-  
-  // Update purchase orders data when context changes
-  useEffect(() => {
-    setPurchaseOrders(purchaseOrders);
-  }, [purchaseOrders]);
-  
+   
   // Get status badge styling
   const getStatusClass = (status) => {
     const statusClasses = {
@@ -82,77 +75,6 @@ const Orders = () => {
     };
     return statusClasses[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   };
-            
-  /* Removed sample data that was mixed in the component */
-
-      items: [
-        { name: "Bluetooth Speakers", quantity: 8, price: 69.99 },
-        { name: "HDMI Cables", quantity: 15, price: 14.99 },
-                  <th className="px-6 py-3 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">{activeTab === 'purchase' ? 'Supplier' : 'Customer'}</th>
-      ],
-      totalAmount: 4325.50, 
-      orderDate: "2023-09-01", 
-      expectedDelivery: "2023-09-10", 
-      status: "pending",
-      contactPerson: "Michael Chen",
-      contactEmail: "michael@qualityelectronics.com",
-      contactPhone: "(555) 456-7890",
-                {filteredOrders.length > 0 ? filteredOrders.map(order => (
-                    <tr 
-                      key={order.id} 
-                      className="hover:bg-surface-50 dark:hover:bg-surface-900 cursor-pointer"
-                      onClick={() => navigate(activeTab === 'purchase' ? `/purchase-order/${order.id}` : `/sales-order/${order.id}`)}
-      id: "PO-2023-004", 
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {activeTab === 'purchase' ? order.supplier.name : order.customer.name}
-                      </td>
-      items: [
-        { name: "Office Chairs", quantity: 5, price: 129.99 },
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(order.status)}`}
->
-        { name: "Filing Cabinets", quantity: 2, price: 89.99 }
-      ],
-      totalAmount: 1879.90, 
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        ${typeof order.totalAmount === 'number' ? order.totalAmount.toFixed(2) : order.totalAmount}
-                      </td>
-      expectedDelivery: "2023-09-25", 
-                        <button className="text-primary hover:text-primary-dark inline-flex items-center">
-                          View 
-                          <ArrowRightIcon className="w-4 h-4 ml-1" />
-                        </button>
-      contactPerson: "Lisa Rodriguez",
-      contactEmail: "lisa@furnitureplus.com",
-                )) : (
-    },
-    { 
-                      {searchTerm 
-                        ? 'No matching orders found.' 
-                        : activeTab === 'purchase' 
-                          ? 'No purchase orders found. Create your first purchase order!' 
-                          : 'No sales orders found. Create your first sales order!'}
-      supplier: "Digital Solutions", 
-      items: [
-        { name: "USB Flash Drives", quantity: 25, price: 12.99 },
-        { name: "External Hard Drives", quantity: 10, price: 89.99 },
-        { name: "Wireless Mice", quantity: 15, price: 24.99 }
-      ],
-      totalAmount: 3149.50, 
-      orderDate: "2023-09-10", 
-      expectedDelivery: "2023-09-17", 
-      status: "pending",
-      contactPerson: "David Wilson",
-      contactEmail: "david@digitalsolutions.com",
-      contactPhone: "(555) 234-5678",
-      deliveryAddress: "654 Digital Avenue, Tech Park, TP 56789"
-    }
-  ]);
-  
-  // Update orders when context changes
-  useEffect(() => {
-    // Use purchaseOrders from context
-    setPurchaseOrders(purchaseOrders);
-    });
 
   const handleOpenOrderDetails = (order, event) => {
     setSelectedOrder(order);
@@ -231,7 +153,7 @@ const Orders = () => {
           <p className="text-surface-600 dark:text-surface-400">
             Create and manage purchase orders with your suppliers. Track order status and delivery details.
           </p>
-    </header>
+        </header>
 
         {/* Main content */}
         <main className="glass-card">
@@ -242,7 +164,7 @@ const Orders = () => {
                 type="text"
                 placeholder="Search by order ID or supplier..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
               />
             </div>
@@ -486,7 +408,7 @@ const Orders = () => {
                       <select
                         value={newStatus || ''}
                         onChange={handleStatusChange}
-                          className="w-full mb-2 text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 pl-2 pr-8"
+                        className="w-full mb-2 text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 pl-2 pr-8"
                       >
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
@@ -494,20 +416,21 @@ const Orders = () => {
                         <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
-                        
-                        <div className="mb-2">
-                          <label className="block text-xs text-surface-600 dark:text-surface-400 mb-1">Status Note:</label>
-                          <textarea
-                            value={statusNote}
-                            onChange={handleStatusNoteChange}
-                            placeholder="Optional note about status change"
-                            className="w-full text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 px-2"
-                            rows="2"
-                          ></textarea>
-                        </div>
-                        
-                        <div className="flex justify-end gap-2">
-                          <button onClick={() => setIsEditingStatus(false)} className="text-surface-600 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-300">Cancel</button>
+                    </div>
+                    
+                    <div className="mb-2">
+                      <label className="block text-xs text-surface-600 dark:text-surface-400 mb-1">Status Note:</label>
+                      <textarea
+                        value={statusNote}
+                        onChange={handleStatusNoteChange}
+                        placeholder="Optional note about status change"
+                        className="w-full text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 px-2"
+                        rows="2"
+                      ></textarea>
+                    </div>
+                    
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setIsEditingStatus(false)} className="text-surface-600 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-300">Cancel</button>
                           <button onClick={handleUpdateStatus}
                         className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                         title="Save status"
@@ -531,9 +454,8 @@ const Orders = () => {
                   )}
                 </div>
               </div>
-                
-                <Link to={`/purchase-order/${selectedOrder.id}`} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs ml-4">
-                  View Full Details
+              <Link to={`/purchase-order/${selectedOrder.id}`} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs ml-4">
+                View Full Details
                 </Link>
               <button
                 onClick={handleCloseOrderDetails}
