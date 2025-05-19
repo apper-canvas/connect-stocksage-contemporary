@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
 import { useSuppliers } from '../context/SupplierContext';
+import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
 
 // Define icons using getIcon utility
 const BarChart3Icon = getIcon('bar-chart-3');
@@ -28,6 +29,8 @@ const PlusIcon = getIcon('plus');
 const FileTextIcon = getIcon('file-text');
 const ExternalLinkIcon = getIcon('external-link');
 const BuildingIcon = getIcon('building');
+const EyeIcon = getIcon('eye');
+const RefreshCwIcon = getIcon('refresh-cw');
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -93,6 +96,14 @@ const Dashboard = () => {
   const navigateToExpiryReport = () => {
     window.location.href = '/reports/product-expiry';
   };
+  
+  const navigateToOrders = () => {
+    window.location.href = '/orders';
+  };
+  
+  const viewOrderDetails = (orderId) => {
+    toast.info(`Viewing details for Order #${orderId}`);
+  };
 
   const navigateToSuppliers = () => {
     window.location.href = '/suppliers';
@@ -110,6 +121,39 @@ const Dashboard = () => {
   // State for inventory filtering and sorting
   const [batchFilter, setBatchFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
+  
+  // Sample purchase orders data
+  const purchaseOrders = [
+    { 
+      id: "PO-2023-001", 
+      supplier: "TechHub Distributors", 
+      items: 12, 
+      totalAmount: 5240.80, 
+      orderDate: "2023-08-15", 
+      expectedDelivery: "2023-08-22", 
+      status: "delivered"
+    },
+    { 
+      id: "PO-2023-002", 
+      supplier: "Office Supplies Co", 
+      items: 45, 
+      totalAmount: 1875.25, 
+      orderDate: "2023-08-20", 
+      expectedDelivery: "2023-09-02", 
+      status: "in-transit" 
+    },
+    { 
+      id: "PO-2023-003", 
+      supplier: "Quality Electronics", 
+      items: 8, 
+      totalAmount: 4325.50, 
+      orderDate: "2023-09-01", 
+      expectedDelivery: "2023-09-10", 
+      status: "pending"
+    }
+  ];
+  
   const [sortDirection, setSortDirection] = useState('asc');
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800">
@@ -473,23 +517,117 @@ const Dashboard = () => {
               )}
               
               {activeTab === 'orders' && (
-                <div className="glass-card">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold text-surface-900 dark:text-white">
-                      Purchase Orders
-                    </h2>
-                    <button 
-                      onClick={navigateToPurchaseOrderWizard}
-                      className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <ClipboardIcon className="h-5 w-5" />
-                      <span>Create Order</span>
-                    </button>
+                <div className="space-y-6">
+                  <div className="glass-card">
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-xl font-semibold text-surface-900 dark:text-white">
+                        Purchase Orders
+                      </h2>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={navigateToOrders}
+                          className="bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-900 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <ExternalLinkIcon className="h-5 w-5" />
+                          <span>View All</span>
+                        </button>
+                        <button 
+                          onClick={navigateToPurchaseOrderWizard}
+                          className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <ClipboardIcon className="h-5 w-5" />
+                          <span>Create Order</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-surface-200 dark:divide-surface-700">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Order ID
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Supplier
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Date
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Amount
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
+                          {purchaseOrders.map(order => (
+                            <tr key={order.id} className="hover:bg-surface-50 dark:hover:bg-surface-700">
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-surface-900 dark:text-white">{order.id}</div>
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="text-sm text-surface-600 dark:text-surface-300">{order.supplier}</div>
+                                <div className="text-xs text-surface-500 dark:text-surface-400">{order.items} items</div>
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="text-sm text-surface-600 dark:text-surface-300">
+                                  {new Date(order.orderDate).toLocaleDateString()}
+                                </div>
+                                <div className="text-xs text-surface-500 dark:text-surface-400">
+                                  Expected: {new Date(order.expectedDelivery).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-surface-900 dark:text-white">
+                                  ${order.totalAmount.toFixed(2)}
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                <PurchaseOrderStatusBadge status={order.status} />
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => viewOrderDetails(order.id)}
+                                    className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors"
+                                    title="View details"
+                                  >
+                                    <EyeIcon className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <div className="flex justify-center mt-6">
+                      <button
+                        onClick={navigateToOrders}
+                        className="inline-flex items-center gap-2 text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary"
+                      >
+                        <span>View all purchase orders</span>
+                        <ExternalLinkIcon className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   
-                  <p className="text-surface-600 dark:text-surface-300 pb-4 border-b border-surface-200 dark:border-surface-700">
-                    This feature will be available in the full version. You can create purchase orders, track delivery status, and manage supplier orders here.
-                  </p>
+                  <div className="glass-card">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-semibold text-surface-900 dark:text-white">
+                        Recent Activity
+                      </h2>
+                      <RefreshCwIcon className="h-5 w-5 text-surface-500 dark:text-surface-400" />
+                    </div>
+                    <p className="text-surface-600 dark:text-surface-300">Track your recent order activities and status changes here.</p>
+                  </div>
                 </div>
               )}
               
