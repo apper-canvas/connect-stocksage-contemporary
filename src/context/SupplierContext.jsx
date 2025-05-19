@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import * as supplierService from '../services/supplierService';
+import * as supplierService from '../../services/supplierService.js';
 
 const SupplierContext = createContext();
 
