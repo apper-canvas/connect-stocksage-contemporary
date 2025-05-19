@@ -36,13 +36,13 @@ body {
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
-    @apply bg-surface-100 dark:bg-surface-800 rounded-full;
+    @apply bg-surface-100 dark:bg-surface-700 rounded-full;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-surface-300 dark:bg-surface-600 rounded-full;
+    @apply bg-surface-300 dark:bg-surface-500 rounded-full;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    @apply bg-surface-400 dark:bg-surface-500;
+    @apply bg-surface-400 dark:bg-surface-400;
   }
 }
 
@@ -59,11 +59,11 @@ body {
   }
   
   .neu-card {
-    @apply bg-surface-100 dark:bg-surface-800 rounded-2xl p-6 shadow-neu-light dark:shadow-neu-dark;
+    @apply bg-surface-100 dark:bg-surface-700 rounded-2xl p-6 shadow-neu-light dark:shadow-neu-dark;
   }
   
   .glass-card {
-    @apply rounded-2xl p-6 backdrop-blur-md bg-white/30 dark:bg-black/30 shadow-soft;
+    @apply rounded-2xl p-6 backdrop-blur-md bg-surface-100/70 dark:bg-surface-800/70 shadow-soft;
   }
   
   /* Modal animations */

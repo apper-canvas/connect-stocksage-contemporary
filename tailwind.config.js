@@ -19,16 +19,16 @@ export default {
         },
         accent: '#f97316',
         surface: {
-          50: '#f8fafc',   // Lightest
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',  // Added
-          500: '#64748b',  // Added
-          600: '#475569',  // Added
-          700: '#334155',  // Added
-          800: '#1e293b',  // Added
-          900: '#0f172a'   // Darkest
+          50: '#f0f9ff',   // Lightest - Sky Blue 50
+          100: '#e0f2fe',  // Sky Blue 100
+          200: '#bae6fd',  // Sky Blue 200
+          300: '#7dd3fc',  // Sky Blue 300
+          400: '#38bdf8',  // Sky Blue 400
+          500: '#0ea5e9',  // Sky Blue 500
+          600: '#0284c7',  // Sky Blue 600
+          700: '#0369a1',  // Sky Blue 700
+          800: '#075985',  // Sky Blue 800
+          900: '#0c4a6e'   // Darkest - Sky Blue 900
         }
       },
       fontFamily: {
