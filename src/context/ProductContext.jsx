@@ -26,6 +26,9 @@ export const useProducts = () => {
   return context;
 };
 
+// Alias for backward compatibility
+export const useProductContext = useProducts;
+
 // Provider component
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState(initialProducts);
