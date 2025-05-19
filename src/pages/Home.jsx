@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
@@ -41,6 +41,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { products } = useProducts();
+  const navigate = useNavigate();
   const { purchaseOrders: contextOrders } = usePurchaseOrders();
   const [searchQuery, setSearchQuery] = useState('');
   const [recentOrders, setRecentOrders] = useState([]);
@@ -358,7 +359,7 @@ const Dashboard = () => {
                               <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                                 <div className="flex space-x-2">
                                   <button
-                                    onClick={() => navigate.push(`/purchase-order/${order.id}`)}
+                                    onClick={() => navigate(`/purchase-order/${order.id}`)}
                                     className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors"
                                     title="View details">
                                     <Link to={`/purchase-order/${order.id}`}>
