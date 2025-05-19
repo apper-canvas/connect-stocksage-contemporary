@@ -5,6 +5,7 @@ import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
 import { useSuppliers } from '../context/SupplierContext';
 import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
+import ProductBatchModel from '../components/ProductBatchModel';
 
 // Define icons using getIcon utility
 const BarChart3Icon = getIcon('bar-chart-3');
