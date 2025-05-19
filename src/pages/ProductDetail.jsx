@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import { useProducts } from '../context/ProductContext';
-import * as productService from '../services/productService';
+import * as productService from '../../services/productService';
 
 // Import icons
 const ArrowLeftIcon = getIcon('arrow-left');
@@ -25,6 +25,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { products } = useProducts();
   const [error, setError] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
