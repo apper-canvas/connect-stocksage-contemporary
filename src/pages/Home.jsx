@@ -99,8 +99,8 @@ const Dashboard = () => {
       const pendingCount = contextOrders.filter(order => order.status === 'pending').length;
       setOverview(prev => prev.map(item => {
         return item.id === 3 ? { ...item, value: pendingCount } : item;
+      }));
       ));
-    }
   }, [contextOrders]);
 
   const handleTabChange = (tab) => {
@@ -362,9 +362,7 @@ const Dashboard = () => {
                                     onClick={() => navigate(`/purchase-order/${order.id}`)}
                                     className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors"
                                     title="View details">
-                                    <Link to={`/purchase-order/${order.id}`}>
-                                      <EyeIcon className="h-5 w-5" />
-                                    </Link>
+                                  <EyeIcon className="h-5 w-5" />
                                   </button>
                                 </div>
                               </td>
