@@ -80,7 +80,7 @@ const ProductList = ({ onEditProduct }) => {
 
   // Check if we need to edit a product based on URL parameter
   if (editProductId && !selectedProduct) {
-    const productToEdit = products.find(p => p.id === parseInt(editProductId));
+    const productToEdit = filteredProducts.find(p => p.id === parseInt(editProductId));
     if (productToEdit) onEditProduct(productToEdit);
   };
 
@@ -431,10 +431,14 @@ const ProductList = ({ onEditProduct }) => {
                   </tr>
                 );
               })
-            </div>
-          </div>
-        </div>
-      )}
+            )}
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+  );
+};
     </div>
   );
 };
