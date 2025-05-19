@@ -404,42 +404,45 @@ const Orders = () => {
                 <div className="mt-1 flex items-center">
                   <span className="text-surface-600 dark:text-surface-400 text-sm mr-2">Status:</span>
                   {isEditingStatus ? (
-                    <div className="flex items-center">
-                      <select
-                        value={newStatus || ''}
-                        onChange={handleStatusChange}
-                        className="w-full mb-2 text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 pl-2 pr-8"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="in-transit">In Transit</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </div>
-                    
-                    <div className="mb-2">
-                      <label className="block text-xs text-surface-600 dark:text-surface-400 mb-1">Status Note:</label>
-                      <textarea
-                        value={statusNote}
-                        onChange={handleStatusNoteChange}
-                        placeholder="Optional note about status change"
-                        className="w-full text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 px-2"
-                        rows="2"
-                      ></textarea>
-                    </div>
-                    
-                    <div className="flex justify-end gap-2">
-                      <button onClick={() => setIsEditingStatus(false)} className="text-surface-600 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-300">Cancel</button>
-                          <button onClick={handleUpdateStatus}
-                        className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                        title="Save status"
-                      >
-                        <SaveIcon className="h-5 w-5" />
-                           </button>
+                    <div className="flex flex-col w-full">
+                      <div className="flex items-center">
+                        <select
+                          value={newStatus || ''}
+                          onChange={handleStatusChange}
+                          className="w-full mb-2 text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 pl-2 pr-8"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="in-transit">In Transit</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                      
+                      <div className="mb-2">
+                        <label className="block text-xs text-surface-600 dark:text-surface-400 mb-1">Status Note:</label>
+                        <textarea
+                          value={statusNote}
+                          onChange={handleStatusNoteChange}
+                          placeholder="Optional note about status change"
+                          className="w-full text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 px-2"
+                          rows="2"
+                        ></textarea>
+                      </div>
+                      
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => setIsEditingStatus(false)} className="text-surface-600 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-300">Cancel</button>
+                        <button 
+                          onClick={handleUpdateStatus}
+                          className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                          title="Save status"
+                        >
+                          <SaveIcon className="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
                   ) : (
-                      <><PurchaseOrderStatusBadge status={selectedOrder.status} /></>
+                    <PurchaseOrderStatusBadge status={selectedOrder.status} />
                   )}
                   {!isEditingStatus && (
                     <button 
