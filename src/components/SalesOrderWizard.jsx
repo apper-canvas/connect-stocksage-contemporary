@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSalesOrderContext } from '../context/SalesOrderContext';
-import { useProductContext } from '../context/ProductContext';
+import { useProducts } from '../context/ProductContext';
 import { getIcon } from '../utils/iconUtils';
 import toast from 'react-hot-toast';
 
@@ -16,7 +16,7 @@ const CheckIcon = getIcon('check');
 const SalesOrderWizard = () => {
   const navigate = useNavigate();
   const { createSalesOrder } = useSalesOrderContext();
-  const { products } = useProductContext();
+  const { products } = useProducts();
   
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
