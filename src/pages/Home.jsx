@@ -514,15 +514,16 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </>
-                /* Product Form Modal */
-                {isProductModalOpen && (
-                  <ProductForm 
-                    isOpen={isProductModalOpen} 
-                    onClose={toggleProductModal} 
-                    onSave={handleAddProduct}
-                    categories={['Electronics', 'Accessories', 'Storage', 'Cables', 'Audio', 'Video', 'Computer Parts']}
-                  />
-                )}
+              )}
+              
+              {/* Product Form Modal */}
+              {isProductModalOpen && (
+                <ProductForm 
+                  isOpen={isProductModalOpen} 
+                  onClose={toggleProductModal} 
+                  onSave={handleAddProduct}
+                  categories={['Electronics', 'Accessories', 'Storage', 'Cables', 'Audio', 'Video', 'Computer Parts']}
+                />
               )}
               
               {activeTab === 'orders' && (
