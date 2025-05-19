@@ -14,6 +14,7 @@ import ProductExpiryReport from './components/ProductExpiryReport';
 import Suppliers from './pages/Suppliers';
 import ProductDetail from './pages/ProductDetail';
 import PurchaseOrderDetail from './pages/PurchaseOrderDetail';
+import SalesOrderDetail from './pages/SalesOrderDetail';
 import Orders from './pages/Orders';
 
 function App() {
