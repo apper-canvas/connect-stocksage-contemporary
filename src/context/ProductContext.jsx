@@ -139,11 +139,11 @@ export const ProductProvider = ({ children }) => {
     setProducts([...products, { ...newProduct, id: products.length + 1 }]);
   };
   
-  const updateProduct = (updatedProduct) => {
+  const updateProduct = (id, updatedFields) => {
     setProducts(products.map(product => {
-      if (product.id === updatedProduct.id) {
+      if (product.id === id) {
         return {
-          ...updatedProduct
+          ...product, ...updatedFields
         };
       }
       return product;

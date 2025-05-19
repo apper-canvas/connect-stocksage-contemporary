@@ -4,6 +4,7 @@ import { useSalesOrderContext } from '../context/SalesOrderContext';
 import { format, parseISO } from 'date-fns';
 import { getIcon } from '../utils/iconUtils';
 import toast from 'react-hot-toast';
+import EditSalesOrderForm from '../components/EditSalesOrderForm';
 
 // Import icons
 const ArrowLeftIcon = getIcon('arrow-left');
@@ -18,20 +19,27 @@ const CheckCircleIcon = getIcon('check-circle');
 const ClockIcon = getIcon('clock');
 const AlertTriangleIcon = getIcon('alert-triangle');
 const EditIcon = getIcon('edit');
+const SaveIcon = getIcon('save');
 const PrinterIcon = getIcon('printer');
 
 const SalesOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getSalesOrderById, updateOrderStatus, cancelSalesOrder } = useSalesOrderContext();
+  const { getSalesOrderById, updateOrderStatus, cancelSalesOrder, updateSalesOrder } = useSalesOrderContext();
   
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [statusNote, setStatusNote] = useState('');
+  
+  // Address editing form state
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [customerInfo, setCustomerInfo] = useState({});
   
   useEffect(() => {
     const loadOrder = () => {
@@ -53,6 +61,14 @@ const SalesOrderDetail = () => {
     
     loadOrder();
   }, [id, getSalesOrderById, navigate]);
+  
+  useEffect(() => {
+    if (order && order.customer) {
+      // Initialize form data when order loads
+      setShippingAddress(order.customer.address || '');
+      setCustomerInfo({ ...order.customer });
+    }
+  }, [order]);
   
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -119,6 +135,26 @@ const SalesOrderDetail = () => {
     window.print();
   };
   
+  const toggleEditMode = () => {
+    setEditing(!editing);
+  };
+  
+  const handleAddressEdit = () => {
+    setEditingAddress(!editingAddress);
+  };
+  
+  const saveAddressChanges = () => {
+    try {
+      const updatedCustomer = { ...customerInfo, address: shippingAddress };
+      updateSalesOrder(id, { customer: updatedCustomer });
+      setOrder({ ...order, customer: updatedCustomer });
+      setEditingAddress(false);
+      toast.success('Shipping address updated successfully');
+    } catch (error) {
+      toast.error('Failed to update shipping address');
+    }
+  };
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-surface-50 dark:bg-surface-900 p-6 flex items-center justify-center">
@@ -145,7 +181,17 @@ const SalesOrderDetail = () => {
     );
   }
   
-  return (
+  return editing ? (
+    <EditSalesOrderForm 
+      order={order} 
+      onCancel={() => setEditing(false)}
+      onSuccess={(updatedOrder) => {
+        setOrder(updatedOrder);
+        setEditing(false);
+        toast.success('Order updated successfully');
+      }}
+    />
+  ) : (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-900 p-6">
       <div className="max-w-4xl mx-auto bg-white dark:bg-surface-800 rounded-lg shadow-card p-6">
         <div className="flex items-center justify-between mb-6">
@@ -170,6 +216,16 @@ const SalesOrderDetail = () => {
             </button>
             
             {order.status !== 'cancelled' && order.status !== 'fulfilled' && (
+              <>
+                <button
+                  onClick={toggleEditMode}
+                  className="p-2 rounded-md text-blue-500 hover:bg-surface-100 dark:hover:bg-surface-700"
+                  aria-label="Edit order"
+                >
+                  <EditIcon className="w-5 h-5" />
+                </button>
+                
+                {" "}
               <button
                 onClick={() => setShowStatusModal(true)}
                 className="p-2 rounded-md text-primary hover:bg-surface-100 dark:hover:bg-surface-700"
@@ -177,6 +233,7 @@ const SalesOrderDetail = () => {
               >
                 <EditIcon className="w-5 h-5" />
               </button>
+              </>
             )}
           </div>
         </div>
@@ -214,10 +271,45 @@ const SalesOrderDetail = () => {
                 <PhoneIcon className="w-4 h-4 mr-2 mt-0.5 text-surface-500 dark:text-surface-400" />
                 <span>{order.customer.phone}</span>
               </div>
-              <div className="flex items-start">
-                <MapPinIcon className="w-4 h-4 mr-2 mt-0.5 text-surface-500 dark:text-surface-400" />
-                <span>{order.customer.address}</span>
-              </div>
+              {editingAddress ? (
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-start">
+                    <MapPinIcon className="w-4 h-4 mr-2 mt-1.5 text-surface-500 dark:text-surface-400" />
+                    <textarea
+                      value={shippingAddress}
+                      onChange={(e) => setShippingAddress(e.target.value)}
+                      className="w-full p-2 border border-surface-300 dark:border-surface-600 rounded-md text-sm"
+                      rows="3"
+                      placeholder="Shipping Address"
+                    ></textarea>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      onClick={() => setEditingAddress(false)}
+                      className="px-2 py-1 text-sm border border-surface-300 dark:border-surface-600 rounded-md hover:bg-surface-100 dark:hover:bg-surface-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveAddressChanges}
+                      className="px-2 py-1 text-sm bg-primary hover:bg-primary-dark text-white rounded-md flex items-center"
+                    >
+                      <SaveIcon className="w-3.5 h-3.5 mr-1" />
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start group">
+                  <MapPinIcon className="w-4 h-4 mr-2 mt-0.5 text-surface-500 dark:text-surface-400" />
+                  <span>{order.customer.address}</span>
+                  {order.status !== 'cancelled' && order.status !== 'fulfilled' && (
+                    <button onClick={handleAddressEdit} className="ml-2 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <EditIcon className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

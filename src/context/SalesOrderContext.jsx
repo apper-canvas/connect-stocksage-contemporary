@@ -74,14 +74,44 @@ export const SalesOrderProvider = ({ children }) => {
     return salesOrders.find(order => order.id === id);
   };
 
-  const updateSalesOrder = (id, updateData) => {
+  const updateSalesOrder = (id, updateData, recalculateTotal = true) => {
     try {
-      setSalesOrders(prevOrders => 
-        prevOrders.map(order => 
-          order.id === id ? { ...order, ...updateData } : order
-        )
-      );
+      setSalesOrders(prevOrders => {
+        return prevOrders.map(order => {
+          if (order.id !== id) return order;
+          
+          // Create updated order
+          const updatedOrder = { ...order, ...updateData };
+          
+          // If we need to recalculate the total (e.g., after item changes)
+          if (recalculateTotal && updatedOrder.items) {
+            updatedOrder.totalAmount = updatedOrder.items.reduce(
+              (sum, item) => sum + (item.unitPrice * item.quantity), 0
+            );
+          }
+          
+          return updatedOrder;
+        });
+      });
+      
       toast.success('Sales order updated successfully');
+      return true;
+    } catch (error) {
+      toast.error('Failed to update sales order');
+      console.error('Error updating sales order:', error);
+      return false;
+    }
+  };
+  
+  const updateOrderItems = (id, items) => {
+    try {
+      // First update the items
+      const success = updateSalesOrder(id, { items }, true);
+      
+      if (!success) {
+        throw new Error("Failed to update order items");
+      }
+      
       return true;
     } catch (error) {
       toast.error('Failed to update sales order');
@@ -152,6 +182,7 @@ export const SalesOrderProvider = ({ children }) => {
     salesOrders,
     createSalesOrder,
     getSalesOrderById,
+    updateOrderItems,
     updateSalesOrder,
     updateOrderStatus,
     cancelSalesOrder,
