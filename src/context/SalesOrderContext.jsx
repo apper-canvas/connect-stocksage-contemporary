@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import { useProductContext } from './ProductContext';
+import { useProducts } from './ProductContext';
 
 // Create context
 const SalesOrderContext = createContext();
@@ -17,7 +17,7 @@ export const SalesOrderProvider = ({ children }) => {
     return savedOrders ? JSON.parse(savedOrders) : [];
   });
   
-  const { products, updateProduct } = useProductContext();
+  const { products, updateProduct } = useProducts();
 
   // Save orders to local storage when they change
   useEffect(() => {
