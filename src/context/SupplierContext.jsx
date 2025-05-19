@@ -3,12 +3,14 @@ import toast from 'react-hot-toast';
 import * as supplierService from '../services/supplierService';
 
 const SupplierContext = createContext();
+
+export const SupplierProvider = ({ children }) => {
   const [suppliers, setSuppliers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simulate API call to fetch suppliers
+    // Fetch suppliers from the service
     const loadSuppliers = async () => {
       setIsLoading(true);
       try {
@@ -67,7 +69,8 @@ const SupplierContext = createContext();
     suppliers,
     isLoading,
     error,
-    addSupplier
+    addSupplier,
+    updateSupplier
   };
 
   return <SupplierContext.Provider value={value}>{children}</SupplierContext.Provider>;
