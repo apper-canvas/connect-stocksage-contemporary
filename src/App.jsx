@@ -13,7 +13,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Callback from './pages/Callback';
 import ErrorPage from './pages/ErrorPage';
-import { setUser, clearUser } from './store/userSlice';
+import { setUser, clearUser } from '../store/userSlice';
 import PurchaseOrderWizard from './components/PurchaseOrderWizard';
 import SalesOrderWizard from './components/SalesOrderWizard';
 import ProductExpiryReport from './components/ProductExpiryReport';
