@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 
-const XIcon = getIcon('x');
-const PlusIcon = getIcon('plus');
-const MinusIcon = getIcon('minus');
+const xIcon = getIcon('x');
+const plusIcon = getIcon('plus');
+const minusIcon = getIcon('minus');
 
 const SupplierForm = ({ supplier = null, onSubmit, onCancel }) => {
   const isEditing = !!supplier;
@@ -93,9 +92,6 @@ const SupplierForm = ({ supplier = null, onSubmit, onCancel }) => {
     
     if (validate()) {
       onSubmit(formData);
-      toast.success(`Supplier ${isEditing ? 'updated' : 'added'} successfully!`);
-    } else {
-      toast.error('Please fix the errors in the form');
     }
   };
   
@@ -226,7 +222,7 @@ const SupplierForm = ({ supplier = null, onSubmit, onCancel }) => {
                   onClick={() => handleRemoveCategory(category)}
                   className="ml-1 text-primary-dark hover:text-primary-dark focus:outline-none"
                 >
-                  <XIcon className="h-4 w-4" />
+                  <xIcon className="h-4 w-4" />
                 </button>
               </span>
             ))}
@@ -238,14 +234,14 @@ const SupplierForm = ({ supplier = null, onSubmit, onCancel }) => {
               onChange={(e) => setNewCategory(e.target.value)}
               placeholder="Add a category"
               className="flex-grow px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-l-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-surface-800 dark:text-white"
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
             />
             <button
               type="button"
               onClick={handleAddCategory}
               className="px-3 py-2 bg-primary text-white rounded-r-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
-              <PlusIcon className="h-5 w-5" />
+              <plusIcon className="h-5 w-5" />
             </button>
           </div>
           {errors.categories && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.categories}</p>}
