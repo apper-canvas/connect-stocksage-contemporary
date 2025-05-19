@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
@@ -89,15 +89,15 @@ const Dashboard = () => {
   useEffect(() => {
     if (contextOrders && contextOrders.length > 0) {
       // Get the most recent orders
-                  <Link to="/sales-order/create" className="mt-auto text-primary hover:text-primary-dark">
+      const sortedOrders = [...contextOrders].sort((a, b) => {
         return new Date(b.orderDate) - new Date(a.orderDate);
       });
       setRecentOrders(sortedOrders.slice(0, 3));
       
       // Update the pending orders count in the overview
       const pendingCount = contextOrders.filter(order => order.status === 'pending').length;
-      setOverview(prev => prev.map(item => 
-        item.id === 3 ? { ...item, value: pendingCount } : item
+      setOverview(prev => prev.map(item => {
+        return item.id === 3 ? { ...item, value: pendingCount } : item;
       ));
     }
   }, [contextOrders]);
@@ -123,12 +123,14 @@ const Dashboard = () => {
   };
   
   const navigateToOrders = () => {
-  const viewOrderDetails = (orderId) => {
+    window.location.href = '/orders';
   };
-
-      status: "pending"
-    }
-  ];
+  
+  const viewOrderDetails = (orderId) => {
+    window.location.href = `/purchase-order/${orderId}`;
+  };
+  
+  const navigateToSuppliers = () => window.location.href = '/suppliers';
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800">
@@ -360,7 +362,8 @@ const Dashboard = () => {
                                     className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors"
                                     title="View details">
                                     <Link to={`/purchase-order/${order.id}`}>
-                                    <EyeIcon className="h-5 w-5" />
+                                      <EyeIcon className="h-5 w-5" />
+                                    </Link>
                                   </button>
                                 </div>
                               </td>
