@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { usePurchaseOrders } from '../context/PurchaseOrderContext';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
@@ -32,8 +33,9 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState('');
+  const [statusNote, setStatusNote] = useState('');
+  const [notification, setNotification] = useState({ visible: false, message: '', type: '' });
   
-  // Sample purchase orders data
   const [purchaseOrders, setPurchaseOrders] = useState([
     { 
       id: "PO-2023-001", 
@@ -121,7 +123,15 @@ const Orders = () => {
       deliveryAddress: "654 Digital Avenue, Tech Park, TP 56789"
     }
   ]);
+  
+  // Get purchase orders from context
+  const { purchaseOrders: contextOrders, updateOrderStatus } = usePurchaseOrders();
 
+  // Update orders when context changes
+  useEffect(() => {
+    setPurchaseOrders(contextOrders);
+  }, [contextOrders]);
+  
   const filteredOrders = purchaseOrders
     .filter(order => {
       // Filter by search query
@@ -156,6 +166,7 @@ const Orders = () => {
   const handleOpenOrderDetails = (order) => {
     setSelectedOrder(order);
     setIsOrderDetailsOpen(true);
+    setNewStatus(order.status);
   };
   
   const handleCloseOrderDetails = () => {
@@ -163,20 +174,37 @@ const Orders = () => {
     setSelectedOrder(null);
     setIsEditingStatus(false);
   };
+
+  // Show notification toast
+  const showNotification = (message, type = 'success') => {
+    setNotification({ visible: true, message, type });
+    setTimeout(() => {
+      setNotification({ visible: false, message: '', type: '' });
+    }, 3000);
+  };
   
   const handleStatusChange = (e) => {
     setNewStatus(e.target.value);
   };
   
+  const handleStatusNoteChange = (e) => {
+    setStatusNote(e.target.value);
+  };
+  
   const handleUpdateStatus = () => {
     if (newStatus && selectedOrder) {
-      // Update the order status in our state
-      const updatedOrders = purchaseOrders.map(order => {
-        if (order.id === selectedOrder.id) {
-          return { ...order, status: newStatus };
-        }
-        return order;
-      });
+      try {
+        // Update using context
+        updateOrderStatus(selectedOrder.id, newStatus, statusNote);
+        
+        // Also update local state
+        setSelectedOrder({ ...selectedOrder, status: newStatus });
+        setIsEditingStatus(false);
+        setStatusNote('');
+        showNotification('Order status updated successfully');
+      } catch (error) {
+        showNotification('Failed to update order status', 'error');
+      }
       
       setPurchaseOrders(updatedOrders);
       setSelectedOrder({ ...selectedOrder, status: newStatus });
@@ -187,6 +215,17 @@ const Orders = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
+        {/* Notification toast */}
+        {notification.visible && (
+          <div 
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${
+              notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`}
+          >
+            {notification.message}
+          </div>
+        )}
+        
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center mb-4">
@@ -383,7 +422,7 @@ const Orders = () => {
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleOpenOrderDetails(order)}
-                            className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors"
+                            className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors flex items-center gap-1"
                             title="View details"
                           >
                             <EyeIcon className="h-5 w-5" />
@@ -393,12 +432,16 @@ const Orders = () => {
                               handleOpenOrderDetails(order);
                               setIsEditingStatus(true);
                               setNewStatus(order.status);
+                              setStatusNote('');
                             }}
-                            className="text-amber-500 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 transition-colors"
+                            className="text-amber-500 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 transition-colors flex items-center gap-1"
                             title="Update status"
                           >
                             <EditIcon className="h-5 w-5" />
                           </button>
+                          <Link to={`/purchase-order/${order.id}`} className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors flex items-center gap-1">
+                            <ExternalLinkIcon className="h-5 w-5" />
+                          </Link>
                         </div>
                       </td>
                     </tr>
@@ -430,7 +473,7 @@ const Orders = () => {
                       <select
                         value={newStatus}
                         onChange={handleStatusChange}
-                        className="mr-2 text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 pl-2 pr-8"
+                          className="w-full mb-2 text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 pl-2 pr-8"
                       >
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
@@ -438,8 +481,22 @@ const Orders = () => {
                         <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
-                      <button 
-                        onClick={handleUpdateStatus}
+                        
+                        <div className="mb-2">
+                          <label className="block text-xs text-surface-600 dark:text-surface-400 mb-1">Status Note:</label>
+                          <textarea
+                            value={statusNote}
+                            onChange={handleStatusNoteChange}
+                            placeholder="Optional note about status change"
+                            className="w-full text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 px-2"
+                            rows="2"
+                          ></textarea>
+                        </div>
+                        
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => setIsEditingStatus(false)} className="text-surface-600 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-300">Cancel</button>
+                          <button onClick={handleUpdateStatus}
+                          
                         className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                         title="Save status"
                       >
@@ -447,7 +504,7 @@ const Orders = () => {
                       </button>
                     </div>
                   ) : (
-                    <PurchaseOrderStatusBadge status={selectedOrder.status} />
+                      <><PurchaseOrderStatusBadge status={selectedOrder.status} /></>
                   )}
                   {!isEditingStatus && (
                     <button 
@@ -462,6 +519,10 @@ const Orders = () => {
                   )}
                 </div>
               </div>
+                
+                <Link to={`/purchase-order/${selectedOrder.id}`} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs ml-4">
+                  View Full Details
+                </Link>
               <button
                 onClick={handleCloseOrderDetails}
                 className="text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200 transition-colors"

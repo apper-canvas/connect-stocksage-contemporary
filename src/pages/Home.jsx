@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
+import { usePurchaseOrders } from '../context/PurchaseOrderContext';
 import { useProducts } from '../context/ProductContext';
 import { useSuppliers } from '../context/SupplierContext';
 import ProductForm from '../components/ProductForm';
@@ -40,10 +41,12 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { products } = useProducts();
+  const { purchaseOrders: contextOrders } = usePurchaseOrders();
   const [searchQuery, setSearchQuery] = useState('');
+  const [recentOrders, setRecentOrders] = useState([]);
 
   // Sample data for the dashboard overview
-  const overview = [
+  const [overview, setOverview] = useState([
     { 
       id: 1, 
       title: 'Total Products', 
@@ -80,7 +83,24 @@ const Dashboard = () => {
       icon: UsersIcon,
       color: 'bg-green-500 dark:bg-green-600' 
     }
-  ];
+  ]);
+
+  // Update overview stats when orders change
+  useEffect(() => {
+    if (contextOrders && contextOrders.length > 0) {
+      // Get the most recent orders
+      const sortedOrders = [...contextOrders].sort((a, b) => {
+        return new Date(b.orderDate) - new Date(a.orderDate);
+      });
+      setRecentOrders(sortedOrders.slice(0, 3));
+      
+      // Update the pending orders count in the overview
+      const pendingCount = contextOrders.filter(order => order.status === 'pending').length;
+      setOverview(prev => prev.map(item => 
+        item.id === 3 ? { ...item, value: pendingCount } : item
+      ));
+    }
+  }, [contextOrders]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -103,44 +123,9 @@ const Dashboard = () => {
   };
   
   const navigateToOrders = () => {
-    window.location.href = '/orders';
-  };
-  
   const viewOrderDetails = (orderId) => {
   };
 
-  const navigateToSuppliers = () => {
-    window.location.href = '/suppliers';
-  };
-
-  
-  // Sample purchase orders data
-  const purchaseOrders = [
-    { 
-      id: "PO-2023-001", 
-      supplier: "TechHub Distributors", 
-      items: 12, 
-      totalAmount: 5240.80, 
-      orderDate: "2023-08-15", 
-      expectedDelivery: "2023-08-22", 
-      status: "delivered"
-    },
-    { 
-      id: "PO-2023-002", 
-      supplier: "Office Supplies Co", 
-      items: 45, 
-      totalAmount: 1875.25, 
-      orderDate: "2023-08-20", 
-      expectedDelivery: "2023-09-02", 
-      status: "in-transit" 
-    },
-    { 
-      id: "PO-2023-003", 
-      supplier: "Quality Electronics", 
-      items: 8, 
-      totalAmount: 4325.50, 
-      orderDate: "2023-09-01", 
-      expectedDelivery: "2023-09-10", 
       status: "pending"
     }
   ];
@@ -343,14 +328,14 @@ const Dashboard = () => {
                           </tr>
                         </thead>
                         <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
-                          {purchaseOrders.map(order => (
+                          {recentOrders.map(order => (
                             <tr key={order.id} className="hover:bg-surface-50 dark:hover:bg-surface-700">
                               <td className="px-4 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-surface-900 dark:text-white">{order.id}</div>
                               </td>
                               <td className="px-4 py-4 whitespace-nowrap">
                                 <div className="text-sm text-surface-600 dark:text-surface-300">{order.supplier}</div>
-                                <div className="text-xs text-surface-500 dark:text-surface-400">{order.items} items</div>
+                                <div className="text-xs text-surface-500 dark:text-surface-400">{order.items.length} items</div>
                               </td>
                               <td className="px-4 py-4 whitespace-nowrap">
                                 <div className="text-sm text-surface-600 dark:text-surface-300">
@@ -371,10 +356,10 @@ const Dashboard = () => {
                               <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                                 <div className="flex space-x-2">
                                   <button
-                                    onClick={() => viewOrderDetails(order.id)}
+                                    onClick={() => navigate.push(`/purchase-order/${order.id}`)}
                                     className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors"
-                                    title="View details"
-                                  >
+                                    title="View details">
+                                    <Link to={`/purchase-order/${order.id}`}>
                                     <EyeIcon className="h-5 w-5" />
                                   </button>
                                 </div>
@@ -389,7 +374,7 @@ const Dashboard = () => {
                       <button
                         onClick={navigateToOrders}
                         className="inline-flex items-center gap-2 text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary"
-                      >
+                        >
                         <span>View all purchase orders</span>
                         <ExternalLinkIcon className="h-4 w-4" />
                       </button>

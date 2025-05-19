@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
+import { usePurchaseOrders } from '../context/PurchaseOrderContext';
 import PurchaseOrderStatusBadge from './PurchaseOrderStatusBadge';
 
 // Icons
@@ -27,10 +28,15 @@ const ChevronRightIcon = getIcon('chevron-right');
 
 const PurchaseOrderWizard = () => {
   // Wizard state management
+  const navigate = useNavigate();
+  const { createPurchaseOrder } = usePurchaseOrders();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [notification, setNotification] = useState({ visible: false, message: '', type: '' });
+  
   
   // Form state
   const [formData, setFormData] = useState({
@@ -39,7 +45,8 @@ const PurchaseOrderWizard = () => {
     items: [],
     expectedDeliveryDate: '',
     notes: '',
-    status: 'draft'
+    status: 'draft',
+    contactInformation: {}
   });
   
   // Search and filter state
@@ -156,6 +163,15 @@ const PurchaseOrderWizard = () => {
   // Calculate order totals
   const orderSubtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   
+  // Show notification
+  const showNotification = (message, type = 'success') => {
+    setNotification({ visible: true, message, type });
+    
+    setTimeout(() => {
+      setNotification({ visible: false, message: '', type: '' });
+    }, 3000);
+  };
+  
   // Handle supplier selection
   const handleSupplierSelect = (supplier) => {
     setFormData(prev => ({
@@ -233,6 +249,23 @@ const PurchaseOrderWizard = () => {
       notes: e.target.value
     }));
   };
+
+  // Validate formData for the current step
+  const validateCurrentStep = () => {
+    setErrorMessage('');
+    
+    if (currentStep === 0 && !formData.supplierId) {
+      setErrorMessage('Please select a supplier first');
+      return false;
+    }
+    
+    if (currentStep === 1 && formData.items.length === 0) {
+      setErrorMessage('Please add at least one product to your order');
+      return false;
+    }
+    
+    return true;
+  };
   
   // Navigation between steps
   const goToNextStep = () => {
@@ -261,21 +294,41 @@ const PurchaseOrderWizard = () => {
   
   // Handle form submission
   const handleSubmit = () => {
-    setIsSubmitting(true);
+    if (!validateCurrentStep()) {
+      return;
+    }
     
-    // Simulate API call
-    setTimeout(() => {
-      // Generate a random order number
-      const newOrderNumber = `PO-${Math.floor(10000 + Math.random() * 90000)}`;
-      setOrderNumber(newOrderNumber);
+    setIsSubmitting(true);
+    setErrorMessage('');
+    
+    try {
+      // Get supplier information
+      const selectedSupplier = suppliers.find(s => s.id === formData.supplierId);
       
+      // Create order data
+      const orderData = {
+        supplier: formData.supplierName,
+        supplierId: formData.supplierId,
+        items: formData.items,
+        totalAmount: orderSubtotal,
+        expectedDelivery: formData.expectedDeliveryDate,
+        notes: formData.notes,
+        contactPerson: selectedSupplier.contactPerson,
+        contactEmail: selectedSupplier.email,
+        contactPhone: selectedSupplier.phone,
+        deliveryAddress: selectedSupplier.address
+      };
+      
+      // Submit to context
+      const newOrder = createPurchaseOrder(orderData);
+      setOrderNumber(newOrder.id);
       setIsSubmitting(false);
       setIsCompleted(true);
-      setFormData(prev => ({
-        ...prev,
-        status: 'pending'
-      }));
-    }, 1500);
+      showNotification('Purchase order created successfully!');
+    } catch (error) {
+      setIsSubmitting(false);
+      setErrorMessage('Failed to create purchase order. Please try again.');
+    }
   };
   
   // Step titles
@@ -288,6 +341,17 @@ const PurchaseOrderWizard = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800 py-8 px-4">
+      {/* Toast Notification */}
+      {notification.visible && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg text-white ${
+          notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`}>
+          <div className="flex items-center">
+            {notification.type === 'success' ? <CheckIcon className="h-5 w-5 mr-2" /> : <AlertCircleIcon className="h-5 w-5 mr-2" />}
+            <p>{notification.message}</p>
+          </div>
+        </div>
+      )}
       <div className="max-w-5xl mx-auto">
         {/* Header with back button */}
         <div className="mb-8">
@@ -311,6 +375,13 @@ const PurchaseOrderWizard = () => {
         
         {!isCompleted ? (
           <div className="glass-card mb-8">
+            {/* Error message */}
+            {errorMessage && (
+              <div className="bg-red-100 dark:bg-red-900 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4 mb-6">
+                <p>{errorMessage}</p>
+              </div>
+            )}
+            
             {/* Step indicator */}
             <div className="flex items-center justify-between mb-8">
               {steps.map((step, index) => {
@@ -834,7 +905,7 @@ const PurchaseOrderWizard = () => {
                   <span className="text-surface-900 dark:text-white">{formData.items.length}</span>
                 </div>
                 
-                <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <span className="text-surface-600 dark:text-surface-300">Order Total:</span>
                   <span className="font-bold text-lg text-surface-900 dark:text-white">${orderSubtotal.toFixed(2)}</span>
                 </div>
@@ -842,10 +913,9 @@ const PurchaseOrderWizard = () => {
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
-                  to="/"
-                  className="py-2 px-4 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
-                >
-                  Return to Dashboard
+                <Link to={`/purchase-order/${orderNumber}`} className="py-2 px-4 rounded-lg bg-primary hover:bg-primary-dark text-white transition-colors flex items-center justify-center gap-2">
+                  <EyeIcon className="h-4 w-4" />
+                  <span>View Order Details</span>
                 </Link>
                 
                 <button
