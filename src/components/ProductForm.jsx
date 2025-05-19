@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getIcon } from '../utils/iconUtils';
 import { useProducts } from '../context/ProductContext';
+import toast from 'react-hot-toast';
 import ProductBatchModel from './ProductBatchModel';
 
 // Define icons
@@ -27,10 +28,12 @@ const ProductForm = ({ isOpen, onClose, product = null }) => {
     expiryDate: product?.expiryDate || '',
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   
   const isEditMode = !!product;
 
+  // Reset the form when opening/closing or switching between add/edit
   // Reset the form when opening/closing or switching between add/edit
   useEffect(() => {
     if (isOpen) {
@@ -121,29 +124,42 @@ const ProductForm = ({ isOpen, onClose, product = null }) => {
       expiryDate: batchData.expiryDate
     });
     
-    // Prepare final product data
-    const productData = {
-      ...formData,
-      batchNumber: batchData.batchNumber,
-      expiryDate: batchData.expiryDate,
-      stock: parseInt(formData.stock, 10)
-    };
+    setIsSubmitting(true);
     
-    // Save or update the product
-    if (isEditMode) {
-      updateProduct(productData);
-      setSuccessMessage('Product updated successfully!');
-    } else {
-      addProduct(productData);
-      setSuccessMessage('New product added successfully!');
+    try {
+      // Prepare final product data
+      const productData = {
+        ...formData,
+        batchNumber: batchData.batchNumber,
+        expiryDate: batchData.expiryDate,
+        stock: parseInt(formData.stock, 10)
+      };
+      
+      // Save or update the product
+      if (isEditMode) {
+        await updateProduct(productData.id, productData);
+        setSuccessMessage('Product updated successfully!');
+        toast.success('Product updated successfully!');
+      } else {
+        await addProduct(productData);
+        setSuccessMessage('New product added successfully!');
+        toast.success('New product added successfully!');
+      }
+      
+      // Close the form after a short delay to show success message
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error) {
+      console.error("Error saving product:", error);
+      setErrors({
+        submit: "Failed to save product. Please try again."
+      });
+      toast.error('Failed to save product');
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    // Close the form after a short delay to show success message
-    setTimeout(() => {
-      onClose();
-    }, 1500);
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -220,6 +236,14 @@ const ProductForm = ({ isOpen, onClose, product = null }) => {
             </div>
           )}
           
+          {errors.submit && (
+            <div className="p-4 bg-red-100 dark:bg-red-900 border-l-4 border-red-500 text-red-700 dark:text-red-200 mb-4">
+              <div className="flex items-center">
+                <AlertCircleIcon className="h-5 w-5 mr-2" />
+                <p>{errors.submit}</p>
+              </div>
+            </div>
+          )}
           {step === 1 && (
             <div className="px-4 pt-5 pb-4 sm:p-6">
               <h3 className="text-lg leading-6 font-medium text-surface-900 dark:text-white mb-4 flex items-center">
@@ -392,6 +416,7 @@ const ProductForm = ({ isOpen, onClose, product = null }) => {
                 type="button"
                 onClick={handleNext}
                 className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm"
+                disabled={isSubmitting}
               >
                 Next
               </button>
@@ -408,6 +433,7 @@ const ProductForm = ({ isOpen, onClose, product = null }) => {
                 type="button"
                 onClick={onClose}
                 className="mt-3 w-full inline-flex justify-center rounded-md border border-surface-300 dark:border-surface-600 shadow-sm px-4 py-2 bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:w-auto sm:text-sm"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>

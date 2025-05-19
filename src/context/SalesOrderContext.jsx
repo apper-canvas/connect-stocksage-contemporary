@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import * as salesOrderService from '../services/salesOrderService';
 import { useProducts } from './ProductContext';
 
 // Create context
@@ -12,181 +13,187 @@ export const useSalesOrderContext = () => {
 };
 
 export const SalesOrderProvider = ({ children }) => {
-  const [salesOrders, setSalesOrders] = useState(() => {
-    const savedOrders = localStorage.getItem('salesOrders');
-    return savedOrders ? JSON.parse(savedOrders) : [];
-  });
+  const [salesOrders, setSalesOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   
   const { products, updateProduct } = useProducts();
 
-  // Save orders to local storage when they change
+  // Fetch sales orders on mount
   useEffect(() => {
-    localStorage.setItem('salesOrders', JSON.stringify(salesOrders));
-  }, [salesOrders]);
+    const fetchOrders = async () => {
+      setIsLoading(true);
+      try {
+        const orders = await salesOrderService.fetchSalesOrders();
+        setSalesOrders(orders);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching sales orders:", err);
+        setError("Failed to fetch sales orders");
+        toast.error("Failed to load sales orders");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchOrders();
+  }, []);
 
-  const generateOrderNumber = () => {
-    const prefix = 'SO';
-    const timestamp = format(new Date(), 'yyyyMMddHHmmss');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `${prefix}-${timestamp}-${random}`;
-  };
-
-  const createSalesOrder = (orderData) => {
+  // Create a new sales order
+  const createSalesOrder = async (orderData) => {
+    setIsLoading(true);
     try {
-      const newOrder = {
-        id: crypto.randomUUID(),
-        orderNumber: generateOrderNumber(),
-        date: new Date().toISOString(),
+      // Format the data for API
+      const apiOrderData = {
+        orderNumber: `SO-${Date.now()}`,
+        date: new Date().toISOString().split('T')[0],
         status: 'pending',
+        totalAmount: orderData.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0),
+        notes: orderData.notes || '',
         customer: orderData.customer,
         items: orderData.items.map(item => ({
-          ...item,
           productId: item.product.id,
           productName: item.product.name,
-          unitPrice: item.product.sellingPrice || item.product.price,
-          total: (item.product.sellingPrice || item.product.price) * item.quantity
-        })),
-        totalAmount: orderData.items.reduce(
-          (sum, item) => sum + ((item.product.sellingPrice || item.product.price) * item.quantity), 
-          0
-        ),
-        notes: orderData.notes || '',
-        statusHistory: [
-          {
-            status: 'pending',
-            date: new Date().toISOString(),
-            note: 'Order created'
-          }
-        ]
+          quantity: item.quantity,
+          unitPrice: item.product.sellingPrice || item.product.price
+        }))
       };
       
+      const newOrder = await salesOrderService.createSalesOrder(apiOrderData);
+      
+      // Update state with new order
       setSalesOrders(prevOrders => [...prevOrders, newOrder]);
-      toast.success('Sales order created successfully');
+      toast.success("Sales order created successfully");
       return newOrder;
     } catch (error) {
-      toast.error('Failed to create sales order');
-      console.error('Error creating sales order:', error);
-      return null;
+      console.error("Error creating sales order:", error);
+      setError("Failed to create sales order");
+      toast.error("Failed to create sales order");
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getSalesOrderById = (id) => {
-    return salesOrders.find(order => order.id === id);
-  };
-
-  const updateSalesOrder = (id, updateData, recalculateTotal = true) => {
+  // Get a sales order by ID
+  const getSalesOrderById = async (id) => {
+    setIsLoading(true);
     try {
-      setSalesOrders(prevOrders => {
-        return prevOrders.map(order => {
-          if (order.id !== id) return order;
-          
-          // Create updated order
-          const updatedOrder = { ...order, ...updateData };
-          
-          // If we need to recalculate the total (e.g., after item changes)
-          if (recalculateTotal && updatedOrder.items) {
-            updatedOrder.totalAmount = updatedOrder.items.reduce(
-              (sum, item) => sum + (item.unitPrice * item.quantity), 0
-            );
-          }
-          
-          return updatedOrder;
-        });
-      });
-      
-      toast.success('Sales order updated successfully');
-      return true;
+      const order = await salesOrderService.getSalesOrderById(id);
+      return order;
     } catch (error) {
-      toast.error('Failed to update sales order');
-      console.error('Error updating sales order:', error);
-      return false;
-    }
-  };
-  
-  const updateOrderItems = (id, items) => {
-    try {
-      // First update the items
-      const success = updateSalesOrder(id, { items }, true);
-      
-      if (!success) {
-        throw new Error("Failed to update order items");
-      }
-      
-      return true;
-    } catch (error) {
-      toast.error('Failed to update sales order');
-      console.error('Error updating sales order:', error);
-      return false;
+      console.error(`Error fetching sales order ${id}:`, error);
+      toast.error("Failed to load sales order details");
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const updateOrderStatus = (id, newStatus, note = '') => {
+  // Update sales order status
+  const updateOrderStatus = async (id, newStatus, note = '') => {
+    setIsLoading(true);
     try {
-      setSalesOrders(prevOrders => 
-        prevOrders.map(order => {
-          if (order.id === id) {
-            const statusUpdate = {
-              status: newStatus,
-              date: new Date().toISOString(),
-              note: note || `Status changed to ${newStatus}`
-            };
-            
-            // If fulfilling order, update inventory
-            if (newStatus === 'fulfilled') {
-              order.items.forEach(item => {
-                const product = products.find(p => p.id === item.productId);
-                if (product) {
-                  updateProduct(product.id, { 
-                    stock: Math.max(0, product.stock - item.quantity) 
-                  });
-                }
+      await salesOrderService.updateSalesOrderStatus(id, newStatus, note);
+      
+      // Update local state
+      setSalesOrders(prevOrders => prevOrders.map(order => {
+        if (order.id !== id) return order;
+        
+        // Create status update
+        const statusUpdate = {
+          status: newStatus,
+          date: new Date().toISOString(),
+          note: note || `Status changed to ${newStatus}`
+        };
+        
+        // If fulfilling order, update inventory
+        if (newStatus === 'fulfilled') {
+          order.items?.forEach(item => {
+            const product = products.find(p => p.id === item.productId);
+            if (product) {
+              updateProduct(product.id, { 
+                stock: Math.max(0, product.stock - item.quantity) 
               });
             }
-            
-            return {
-              ...order,
-              status: newStatus,
-              statusHistory: [...order.statusHistory, statusUpdate]
-            };
-          }
-          return order;
-        })
-      );
+          });
+        }
+        
+        return {
+          ...order,
+          status: newStatus,
+          statusHistory: [...(order.statusHistory || []), statusUpdate]
+        };
+      }));
       
       toast.success(`Order status updated to ${newStatus}`);
       return true;
     } catch (error) {
-      toast.error('Failed to update order status');
-      console.error('Error updating order status:', error);
-      return false;
+      console.error(`Error updating status for order ${id}:`, error);
+      setError("Failed to update order status");
+      toast.error("Failed to update order status");
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const cancelSalesOrder = (id, reason = '') => {
+  const cancelSalesOrder = async (id, reason = '') => {
     return updateOrderStatus(id, 'cancelled', reason || 'Order cancelled');
   };
 
-  const deleteSalesOrder = (id) => {
+  // Update a sales order
+  const updateSalesOrder = async (id, updateData, recalculateTotal = true) => {
+    setIsLoading(true);
     try {
-      setSalesOrders(prevOrders => prevOrders.filter(order => order.id !== id));
-      toast.success('Sales order deleted successfully');
+      const updatedOrder = await salesOrderService.updateSalesOrder(id, updateData);
+      
+      // Update state with updated order
+      setSalesOrders(prevOrders => prevOrders.map(order => {
+        if (order.id !== id) return order;
+        
+        // Create updated order
+        const newOrder = { ...order, ...updatedOrder };
+        
+        // If we need to recalculate the total (e.g., after item changes)
+        if (recalculateTotal && newOrder.items) {
+          newOrder.totalAmount = newOrder.items.reduce(
+            (sum, item) => sum + (item.unitPrice * item.quantity), 0
+          );
+        }
+        
+        return newOrder;
+      }));
+      
+      toast.success('Sales order updated successfully');
       return true;
     } catch (error) {
-      toast.error('Failed to delete sales order');
-      console.error('Error deleting sales order:', error);
+      console.error(`Error updating sales order ${id}:`, error);
+      setError("Failed to update sales order");
+      toast.error('Failed to update sales order');
       return false;
+    } finally {
+      setIsLoading(false);
     }
+  };
+  
+  const updateOrderItems = async (id, items) => {
+    // Implement this as needed using the service
+    // Currently, this would need to delete existing items and create new ones
+    // through the appropriate API calls
+    return updateSalesOrder(id, { items }, true);
   };
 
   const value = {
     salesOrders,
+    isLoading,
+    error,
     createSalesOrder,
     getSalesOrderById,
     updateOrderItems,
     updateSalesOrder,
     updateOrderStatus,
-    cancelSalesOrder,
-    deleteSalesOrder
+    cancelSalesOrder
   };
 
   return (

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import { useProducts } from '../context/ProductContext';
+import * as productService from '../services/productService';
 
 // Import icons
 const ArrowLeftIcon = getIcon('arrow-left');
@@ -22,20 +23,27 @@ const InfoIcon = getIcon('info');
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products } = useProducts();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      const foundProduct = products.find(p => p.id === parseInt(id));
-      setProduct(foundProduct || null);
-      setLoading(false);
-    }, 400);
-
-    return () => clearTimeout(timer);
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const productData = await productService.getProductById(id);
+        setProduct(productData);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching product:", err);
+        setError("Failed to load product details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProduct();
   }, [id, products]);
 
   const getExpiryStatus = () => {

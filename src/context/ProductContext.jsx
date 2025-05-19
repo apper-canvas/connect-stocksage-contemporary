@@ -1,21 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import * as productService from '../services/productService';
 
-// Create the context
 const ProductContext = createContext();
-
-// Sample initial product data
-const initialProducts = [
-  { id: 1, name: 'Wireless Headphones', sku: 'WH-101', category: 'Electronics', stock: 45, batchNumber: 'BT-20230801', expiryDate: '2024-02-15', location: 'Warehouse A' },
-  { id: 2, name: 'Smartphone Charger', sku: 'SC-202', category: 'Electronics', stock: 120, batchNumber: 'BT-20230715', expiryDate: '2025-07-10', location: 'Warehouse A' },
-  { id: 3, name: 'Laptop Sleeve', sku: 'LS-303', category: 'Accessories', stock: 18, batchNumber: 'BT-20220512', expiryDate: '2023-12-01', location: 'Warehouse B' },
-  { id: 4, name: 'Bluetooth Speaker', sku: 'BS-404', category: 'Electronics', stock: 32, batchNumber: 'BT-20230610', expiryDate: '2024-01-05', location: 'Warehouse B' },
-  { id: 5, name: 'HDMI Cable', sku: 'HC-505', category: 'Accessories', stock: 64, batchNumber: 'BT-20230420', expiryDate: '2026-04-20', location: 'Warehouse C' },
-  { id: 6, name: 'External SSD', sku: 'ES-606', category: 'Storage', stock: 27, batchNumber: 'BT-20230901', expiryDate: '2028-09-01', location: 'Warehouse A' },
-  { id: 7, name: 'Wireless Mouse', sku: 'WM-707', category: 'Computer Parts', stock: 83, batchNumber: 'BT-20231015', expiryDate: '2026-10-15', location: 'Warehouse C' },
-  { id: 8, name: 'Webcam HD', sku: 'WC-808', category: 'Computer Parts', stock: 15, batchNumber: 'BT-20230630', expiryDate: '2025-06-30', location: 'Warehouse B' },
-  { id: 9, name: 'USB-C Hub', sku: 'UH-909', category: 'Accessories', stock: 52, batchNumber: 'BT-20230525', expiryDate: '2026-05-25', location: 'Warehouse A' },
-  { id: 10, name: 'Mechanical Keyboard', sku: 'MK-1010', category: 'Computer Parts', stock: 7, batchNumber: 'BT-20231120', expiryDate: '2027-11-20', location: 'Warehouse B' },
-];
 
 // Custom hook to use the product context
 export const useProducts = () => {
@@ -31,7 +18,7 @@ export const useProductContext = useProducts;
 
 // Provider component
 export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -55,102 +42,175 @@ export const ProductProvider = ({ children }) => {
 
   // Apply filters and sorting when any filter changes
   useEffect(() => {
-    setIsLoading(true);
-    
-    // Simulate server delay
-    const timeoutId = setTimeout(() => {
-      let result = [...products];
+    if (products.length > 0) {
+      setIsLoading(true);
       
-      // Apply search query filter
+      // Build filter parameters for the API
+      const filterParams = {};
+      
+      // Search query filter
       if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        result = result.filter(product => 
-          product.name.toLowerCase().includes(query) || 
-          product.sku.toLowerCase().includes(query) ||
-          product.batchNumber.toLowerCase().includes(query)
-        );
+        filterParams.where = [
+          {
+            fieldName: "Name",
+            operator: "Contains",
+            values: [searchQuery]
+          }
+        ];
       }
       
-      // Apply category filter
+      // Category filter
       if (categoryFilter) {
-        result = result.filter(product => product.category === categoryFilter);
-      }
-      
-      // Apply location filter
-      if (locationFilter) {
-        result = result.filter(product => product.location === locationFilter);
-      }
-      
-      // Apply stock level filter
-      if (stockLevelFilter === 'low') {
-        result = result.filter(product => product.stock < 20);
-      } else if (stockLevelFilter === 'medium') {
-        result = result.filter(product => product.stock >= 20 && product.stock < 50);
-      } else if (stockLevelFilter === 'high') {
-        result = result.filter(product => product.stock >= 50);
-      }
-      
-      // Apply batch filter
-      if (batchFilter) {
-        result = result.filter(product => 
-          product.batchNumber.toLowerCase().includes(batchFilter.toLowerCase())
-        );
-      }
-      
-      // Apply expiry filter
-      if (expiryFilter === 'expired') {
-        result = result.filter(product => new Date(product.expiryDate) < new Date());
-      } else if (expiryFilter === 'soon') {
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-        result = result.filter(product => {
-          const expiryDate = new Date(product.expiryDate);
-          return expiryDate > new Date() && expiryDate <= thirtyDaysFromNow;
-        });
-      } else if (expiryFilter === 'good') {
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-        result = result.filter(product => new Date(product.expiryDate) > thirtyDaysFromNow);
-      }
-      
-      // Apply sorting
-      result.sort((a, b) => {
-        let first = a[sortBy];
-        let second = b[sortBy];
-        
-        // Handle date sorting
-        if (sortBy === 'expiryDate') {
-          first = new Date(first);
-          second = new Date(second);
-        }
-        
-        if (sortDirection === 'asc') {
-          return first > second ? 1 : -1;
+        if (filterParams.where) {
+          filterParams.where.push({
+            fieldName: "category",
+            operator: "ExactMatch",
+            values: [categoryFilter]
+          });
         } else {
-          return first < second ? 1 : -1;
+          filterParams.where = [{
+            fieldName: "category",
+            operator: "ExactMatch",
+            values: [categoryFilter]
+          }];
         }
-      });
+      }
       
-      setFilteredProducts(result);
-      setIsLoading(false);
-    }, 300); // Short delay to simulate server request
-    
-    return () => clearTimeout(timeoutId);
-  }, [products, searchQuery, categoryFilter, locationFilter, stockLevelFilter, batchFilter, expiryFilter, sortBy, sortDirection]);
+      // Location filter
+      if (locationFilter) {
+        if (filterParams.where) {
+          filterParams.where.push({
+            fieldName: "location",
+            operator: "ExactMatch",
+            values: [locationFilter]
+          });
+        } else {
+          filterParams.where = [{
+            fieldName: "location",
+            operator: "ExactMatch",
+            values: [locationFilter]
+          }];
+        }
+      }
+      
+      // Stock level filter
+      if (stockLevelFilter) {
+        const stockCondition = {};
+        
+        if (stockLevelFilter === 'low') {
+          stockCondition.fieldName = "stock";
+          stockCondition.operator = "LessThan";
+          stockCondition.values = [20];
+        } else if (stockLevelFilter === 'medium') {
+          stockCondition.fieldName = "stock";
+          stockCondition.operator = "Between";
+          stockCondition.values = [20, 50];
+        } else if (stockLevelFilter === 'high') {
+          stockCondition.fieldName = "stock";
+          stockCondition.operator = "GreaterThan";
+          stockCondition.values = [50];
+        }
+        
+        if (Object.keys(stockCondition).length > 0) {
+          if (filterParams.where) {
+            filterParams.where.push(stockCondition);
+          } else {
+            filterParams.where = [stockCondition];
+          }
+        }
+      }
+      
+      // Batch filter
+      if (batchFilter) {
+        if (filterParams.where) {
+          filterParams.where.push({
+            fieldName: "batchNumber",
+            operator: "Contains",
+            values: [batchFilter]
+          });
+        } else {
+          filterParams.where = [{
+            fieldName: "batchNumber",
+            operator: "Contains",
+            values: [batchFilter]
+          }];
+        }
+      }
+      
+      // Sorting
+      filterParams.orderBy = [{
+        field: sortBy === 'name' ? 'Name' : sortBy,
+        direction: sortDirection
+      }];
+      
+      // Apply filters using service
+      const applyFilters = async () => {
+        try {
+          const filteredData = await productService.fetchProducts(filterParams);
+          setFilteredProducts(filteredData);
+        } catch (error) {
+          console.error("Error applying filters:", error);
+          toast.error("Failed to filter products");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      applyFilters();
+    }
+  }, [searchQuery, categoryFilter, locationFilter, stockLevelFilter, batchFilter, expiryFilter, sortBy, sortDirection]);
 
-  const addProduct = (newProduct) => {
-    setProducts([...products, { ...newProduct, id: products.length + 1 }]);
+  // Fetch products on initial load
+  useEffect(() => {
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const data = await productService.fetchProducts();
+        setProducts(data);
+        setFilteredProducts(data);
+      } catch (error) {
+        console.error("Error loading products:", error);
+        toast.error("Failed to load products");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadProducts();
+  }, []);
+
+  const addProduct = async (newProduct) => {
+    setIsLoading(true);
+    try {
+      const createdProduct = await productService.createProduct(newProduct);
+      setProducts(prevProducts => [...prevProducts, createdProduct]);
+      toast.success("Product added successfully");
+      return createdProduct;
+    } catch (error) {
+      console.error("Error adding product:", error);
+      toast.error("Failed to add product");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  const updateProduct = (id, updatedFields) => {
-    setProducts(products.map(product => {
-      if (product.id === id) {
-        return {
-          ...product, ...updatedFields
-        };
-      }
-      return product;
-    }));
+  const updateProduct = async (id, updatedFields) => {
+    setIsLoading(true);
+    try {
+      const updatedProduct = await productService.updateProduct(id, updatedFields);
+      setProducts(prevProducts => prevProducts.map(product => 
+        product.id === id ? { ...product, ...updatedProduct } : product
+      ));
+      toast.success("Product updated successfully");
+      return updatedProduct;
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast.error("Failed to update product");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const value = { products, filteredProducts, isLoading, categories, locations, addProduct, updateProduct,
