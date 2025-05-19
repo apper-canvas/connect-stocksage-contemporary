@@ -14,6 +14,8 @@ const TrashIcon = getIcon('trash-2');
 const RefreshCcwIcon = getIcon('refresh-ccw');
 const CheckIcon = getIcon('check-circle');
 const WarningIcon = getIcon('alert-triangle');
+const CalendarIcon = getIcon('calendar');
+const HashIcon = getIcon('hash');
 
 const MainFeature = () => {
   // State for inventory transactions
@@ -21,6 +23,8 @@ const MainFeature = () => {
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [description, setDescription] = useState('');
+  const [batchNumber, setBatchNumber] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -28,9 +32,11 @@ const MainFeature = () => {
   const products = [
     { id: '1', name: 'Wireless Headphones', sku: 'WH-101', currentStock: 45, location: 'Warehouse A' },
     { id: '2', name: 'Smartphone Charger', sku: 'SC-202', currentStock: 120, location: 'Warehouse A' },
-    { id: '3', name: 'Laptop Sleeve', sku: 'LS-303', currentStock: 18, location: 'Warehouse B' },
-    { id: '4', name: 'Bluetooth Speaker', sku: 'BS-404', currentStock: 32, location: 'Warehouse B' },
-    { id: '5', name: 'HDMI Cable', sku: 'HC-505', currentStock: 64, location: 'Warehouse C' },
+    { id: '3', name: 'Laptop Sleeve', sku: 'LS-303', currentStock: 18, location: 'Warehouse B', hasExpiry: true },
+    { id: '4', name: 'Bluetooth Speaker', sku: 'BS-404', currentStock: 32, location: 'Warehouse B', hasExpiry: true },
+    { id: '5', name: 'HDMI Cable', sku: 'HC-505', currentStock: 64, location: 'Warehouse C', hasExpiry: false },
+    { id: '6', name: 'Keyboard Cleaner', sku: 'KC-606', currentStock: 25, location: 'Warehouse A', hasExpiry: true },
+    { id: '7', name: 'Screen Protector', sku: 'SP-707', currentStock: 42, location: 'Warehouse C', hasExpiry: true },
   ];
 
   // Load sample transactions on component mount
@@ -42,7 +48,9 @@ const MainFeature = () => {
         type: 'stock-in', 
         productId: '1', 
         quantity: 50, 
-        description: 'Initial inventory'
+        description: 'Initial inventory',
+        batchNumber: '',
+        expiryDate: ''
       },
       { 
         id: 'txn-002', 
@@ -50,7 +58,9 @@ const MainFeature = () => {
         type: 'stock-out', 
         productId: '1', 
         quantity: 5, 
-        description: 'Order #45892'
+        description: 'Order #45892',
+        batchNumber: '',
+        expiryDate: ''
       },
       { 
         id: 'txn-003', 
@@ -58,7 +68,19 @@ const MainFeature = () => {
         type: 'adjustment', 
         productId: '2', 
         quantity: 10, 
-        description: 'Inventory count correction'
+        description: 'Inventory count correction',
+        batchNumber: '',
+        expiryDate: ''
+      },
+      { 
+        id: 'txn-004', 
+        date: new Date(2023, 11, 1).toISOString(), 
+        type: 'stock-in', 
+        productId: '6', 
+        quantity: 25, 
+        description: 'New shipment',
+        batchNumber: 'KC-2023-11',
+        expiryDate: '2024-11-01'
       }
     ]);
   }, []);
@@ -77,6 +99,26 @@ const MainFeature = () => {
       return;
     }
     
+    const selectedProductData = products.find(p => p.id === selectedProduct);
+    
+    // Validate batch number and expiry date for products with expiry
+    if (selectedProductData?.hasExpiry && transactionType === 'stock-in') {
+      if (!batchNumber.trim()) {
+        toast.error('Please enter a batch number for this product');
+        return;
+      }
+      
+      if (!expiryDate) {
+        toast.error('Please specify an expiry date for this product');
+        return;
+      }
+      
+      if (new Date(expiryDate) <= new Date()) {
+        toast.error('Expiry date must be in the future');
+        return;
+      }
+    }
+    
     setIsLoading(true);
     
     // Simulate API call
@@ -87,6 +129,8 @@ const MainFeature = () => {
         type: transactionType,
         productId: selectedProduct,
         quantity: Number(quantity),
+        batchNumber: batchNumber.trim(),
+        expiryDate: expiryDate,
         description: description.trim() || 'No description provided'
       };
       
@@ -101,6 +145,8 @@ const MainFeature = () => {
       setSelectedProduct('');
       setQuantity(1);
       setDescription('');
+      setBatchNumber('');
+      setExpiryDate('');
       setIsLoading(false);
     }, 800);
   };
@@ -124,6 +170,32 @@ const MainFeature = () => {
   };
   
   // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Check if selected product has expiry tracking
+  const selectedProductHasExpiry = () => {
+    if (!selectedProduct) return false;
+    const product = products.find(p => p.id === selectedProduct);
+    return product?.hasExpiry === true;
+  };
+
+  // Get today's date in YYYY-MM-DD format for input min
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -254,6 +326,53 @@ const MainFeature = () => {
               </button>
             </div>
           </div>
+
+          {/* Batch and Expiry fields - only shown for products with expiry and stock-in transactions */}
+          {selectedProductHasExpiry() && transactionType === 'stock-in' && (
+            <div className="mt-5 pt-5 border-t border-surface-200 dark:border-surface-700">
+              <h3 className="text-md font-medium text-surface-900 dark:text-white mb-3">
+                Batch & Expiry Information
+              </h3>
+              
+              {/* Batch Number */}
+              <div className="mb-4">
+                <label htmlFor="batchNumber" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                  Batch Number*
+                </label>
+                <div className="relative">
+                  <HashIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-surface-400" />
+                  <input
+                    id="batchNumber"
+                    type="text"
+                    value={batchNumber}
+                    onChange={(e) => setBatchNumber(e.target.value)}
+                    placeholder="Enter batch identifier"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-primary text-surface-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+              
+              {/* Expiry Date */}
+              <div>
+                <label htmlFor="expiryDate" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                  Expiry Date*
+                </label>
+                <div className="relative">
+                  <CalendarIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-surface-400" />
+                  <input
+                    id="expiryDate"
+                    type="date"
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-primary text-surface-900 dark:text-white"
+                    min={getTodayDate()}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Description */}
           <div>
@@ -396,6 +515,12 @@ const MainFeature = () => {
                   <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     Description
                   </th>
+                  <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                    Batch #
+                  </th>
+                  <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-left text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                    Expiry
+                  </th>
                   <th className="px-4 py-3 bg-surface-50 dark:bg-surface-800 text-right text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     Actions
                   </th>
@@ -431,6 +556,18 @@ const MainFeature = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300 max-w-[200px] truncate">
                         {transaction.description}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">
+                        {transaction.batchNumber || "-"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        {transaction.expiryDate ? (
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            new Date(transaction.expiryDate) < new Date() ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          }`}>
+                            {new Date(transaction.expiryDate).toLocaleDateString()}
+                          </span>
+                        ) : "-"}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button

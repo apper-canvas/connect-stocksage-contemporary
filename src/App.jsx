@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 
 import PurchaseOrderWizard from './components/PurchaseOrderWizard';
+import ProductExpiryReport from './components/ProductExpiryReport';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -62,6 +63,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/purchase-order/create" element={<PurchaseOrderWizard />} />
+        <Route path="/reports/product-expiry" element={<ProductExpiryReport />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
