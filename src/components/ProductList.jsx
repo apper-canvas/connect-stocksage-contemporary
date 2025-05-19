@@ -184,9 +184,9 @@ const ProductList = ({ onEditProduct }) => {
                       className="appearance-none w-full pl-3 pr-10 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
                     >
                       <option value="">All Stock Levels</option>
-                      <option value="low">Low Stock (< 20)</option>
+                      <option value="low">Low Stock (&lt; 20)</option>
                       <option value="medium">Medium Stock (20-50)</option>
-                      <option value="high">High Stock (> 50)</option>
+                      <option value="high">High Stock (&gt; 50)</option>
                     </select>
                   </div>
                   
