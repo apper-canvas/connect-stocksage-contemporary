@@ -79,7 +79,7 @@ export const PurchaseOrderProvider = ({ children }) => {
           status: newStatus,
           statusHistory: [...(order.statusHistory || []), statusUpdate]
         };
-      });
+      }));
       
       setError(null);
       toast.success(`Order status updated to ${newStatus}`);
