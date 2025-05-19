@@ -82,7 +82,7 @@ const ProductList = ({ onEditProduct }) => {
   if (editProductId && !selectedProduct) {
     const productToEdit = filteredProducts.find(p => p.id === parseInt(editProductId));
     if (productToEdit) onEditProduct(productToEdit);
-  };
+  }
 
   const activeFiltersCount = [
     categoryFilter, 
@@ -436,9 +436,6 @@ const ProductList = ({ onEditProduct }) => {
         </table>
       </div>
       
-    </div>
-  );
-};
     </div>
   );
 };
