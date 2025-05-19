@@ -126,6 +126,10 @@ function App() {
     setIsDarkMode(!isDarkMode);
   };
 
+  // Using icon utilities correctly
+  const SunIcon = getIcon('sun');
+  const MoonIcon = getIcon('moon');
+
   // Authentication methods to share via context
   const authMethods = {
     isInitialized,
@@ -181,11 +185,8 @@ function App() {
         </PurchaseOrderProvider>
       </ProductProvider>
     </SupplierProvider>
+    </AuthContext.Provider>
   );
 }
-
-// Using icon utilities correctly
-const SunIcon = getIcon('sun');
-const MoonIcon = getIcon('moon');
 
 export default App;
