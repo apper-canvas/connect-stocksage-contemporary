@@ -100,7 +100,6 @@ const Dashboard = () => {
       setOverview(prev => prev.map(item => {
         return item.id === 3 ? { ...item, value: pendingCount } : item;
       }));
-      ));
   }, [contextOrders]);
 
   const handleTabChange = (tab) => {
@@ -116,22 +115,22 @@ const Dashboard = () => {
   };
 
   const navigateToPurchaseOrderWizard = () => {
-    window.location.href = '/purchase-order/create';
+    navigate('/purchase-order/create');
   };
 
   const navigateToExpiryReport = () => {
-    window.location.href = '/reports/product-expiry';
+    navigate('/reports/product-expiry');
   };
   
   const navigateToOrders = () => {
-    window.location.href = '/orders';
+    navigate('/orders');
   };
   
   const viewOrderDetails = (orderId) => {
-    window.location.href = `/purchase-order/${orderId}`;
+    navigate(`/purchase-order/${orderId}`);
   };
   
-  const navigateToSuppliers = () => window.location.href = '/suppliers';
+  const navigateToSuppliers = () => navigate('/suppliers');
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800">
@@ -362,8 +361,8 @@ const Dashboard = () => {
                                     onClick={() => navigate(`/purchase-order/${order.id}`)}
                                     className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors"
                                     title="View details">
-                                  <EyeIcon className="h-5 w-5" />
-                                  </button>
+                                    <EyeIcon className="h-5 w-5" />
+                                </button>
                                 </div>
                               </td>
                             </tr>
