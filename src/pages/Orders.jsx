@@ -1,53 +1,41 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { usePurchaseOrders } from '../context/PurchaseOrderContext';
 import { useSalesOrderContext } from '../context/SalesOrderContext';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import PurchaseOrderStatusBadge from '../components/PurchaseOrderStatusBadge';
 
+// Import all icons used in the component
 const PlusIcon = getIcon('plus');
 const ArrowRightIcon = getIcon('arrow-right');
 const UsersIcon = getIcon('users');
-// Import icons
 const ArrowLeftIcon = getIcon('arrow-left');
 const SearchIcon = getIcon('search');
 const FilterIcon = getIcon('filter');
 const SortAscIcon = getIcon('arrow-up');
 const SortDescIcon = getIcon('arrow-down');
 const ClipboardIcon = getIcon('clipboard-list');
-  const { salesOrders } = useSalesOrderContext();
 const ChevronDownIcon = getIcon('chevron-down');
-  const [activeTab, setActiveTab] = useState('purchase');
-const PlusIcon = getIcon('plus');
-  const [filteredOrders, setFilteredOrders] = useState([]);
-  
-  useEffect(() => {
-    const orders = activeTab === 'purchase' ? purchaseOrders : salesOrders;
-    if (searchTerm.trim() === '') {
-      setFilteredOrders(orders);
-    } else {
-      const lowercasedSearch = searchTerm.toLowerCase();
-      setFilteredOrders(orders.filter(order => 
-        order.orderNumber.toLowerCase().includes(lowercasedSearch) ||
-        (activeTab === 'purchase' && order.supplier.name.toLowerCase().includes(lowercasedSearch)) ||
-        (activeTab === 'sales' && order.customer.name.toLowerCase().includes(lowercasedSearch)) ||
-        order.status.toLowerCase().includes(lowercasedSearch)
-      ));
-    }
-  }, [searchTerm, purchaseOrders, salesOrders, activeTab]);
 const EyeIcon = getIcon('eye');
-  const getStatusClass = (status) => {
-    const statusClasses = {
-      'pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      'in-progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      'completed': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
 const TruckIcon = getIcon('truck');
 const UserIcon = getIcon('user');
 const DollarSignIcon = getIcon('dollar-sign');
 const SaveIcon = getIcon('save');
+const EditIcon = getIcon('edit');
+const XIcon = getIcon('x');
+const BoxIcon = getIcon('box');
+const CalendarIcon = getIcon('calendar');
+const ExternalLinkIcon = getIcon('external-link');
 
 const Orders = () => {
+  const navigate = useNavigate();
+  const { purchaseOrders, updateOrderStatus } = usePurchaseOrders();
+  const { salesOrders } = useSalesOrderContext();
+  
+  const [activeTab, setActiveTab] = useState('purchase');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('orderDate');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -57,19 +45,46 @@ const Orders = () => {
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [statusNote, setStatusNote] = useState('');
+  const [purchaseOrdersData, setPurchaseOrders] = useState([]);
   const [notification, setNotification] = useState({ visible: false, message: '', type: '' });
   
-              <p className="text-surface-600 dark:text-surface-400">
-                Manage your orders
-              </p>
-            </div>
+  // Update filtered orders when tab, search term, or orders change
+  useEffect(() => {
+    const orders = activeTab === 'purchase' ? purchaseOrders : salesOrders;
+    if (!searchTerm || searchTerm.trim() === '') {
+      setFilteredOrders(orders);
+    } else {
+      const lowercasedSearch = searchTerm.toLowerCase();
+      setFilteredOrders(orders.filter(order => 
+        (order.orderNumber && order.orderNumber.toLowerCase().includes(lowercasedSearch)) ||
+        (activeTab === 'purchase' && order.supplier && order.supplier.name && order.supplier.name.toLowerCase().includes(lowercasedSearch)) ||
+        (activeTab === 'sales' && order.customer && order.customer.name && order.customer.name.toLowerCase().includes(lowercasedSearch)) ||
+        (order.status && order.status.toLowerCase().includes(lowercasedSearch))
+      ));
+    }
+  }, [searchTerm, purchaseOrders, salesOrders, activeTab]);
+  
+  // Update purchase orders data when context changes
+  useEffect(() => {
+    setPurchaseOrders(purchaseOrders);
+  }, [purchaseOrders]);
+  
+  // Get status badge styling
+  const getStatusClass = (status) => {
+    const statusClasses = {
+      'pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      'in-progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      'processing': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      'in-transit': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      'delivered': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      'completed': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      'cancelled': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  };
             
-            <div className="flex">
-              <Link to={activeTab === 'purchase' ? '/purchase-order/create' : '/sales-order/create'} className="flex items-center bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md">
-                <PlusIcon className="w-4 h-4 mr-1" />
-                New {activeTab === 'purchase' ? 'Purchase' : 'Sales'} Order
-              </Link>
-    { 
+  /* Removed sample data that was mixed in the component */
+  
       id: "PO-2023-001", 
       supplier: "TechHub Distributors", 
       items: [
@@ -83,28 +98,6 @@ const Orders = () => {
       status: "delivered",
       contactPerson: "John Smith",
       contactEmail: "john@techhub.com",
-      contactPhone: "(555) 123-4567",
-        {/* Order Type Tabs */}
-        <div className="border-b border-surface-200 dark:border-surface-700 mb-6">
-          <div className="flex space-x-8">
-            <button 
-              onClick={() => setActiveTab('purchase')}
-              className={`py-3 font-medium flex items-center ${activeTab === 'purchase' 
-                ? 'border-b-2 border-primary text-primary' 
-                : 'text-surface-600 dark:text-surface-400'}`}
-            >
-              <ClipboardIcon className="w-4 h-4 mr-2" />
-              Purchase Orders
-            </button>
-            <button 
-              onClick={() => setActiveTab('sales')}
-              className={`py-3 font-medium flex items-center ${activeTab === 'sales' 
-                ? 'border-b-2 border-primary text-primary' 
-                : 'text-surface-600 dark:text-surface-400'}`}
-            >
-              <UsersIcon className="w-4 h-4 mr-2" />
-              Sales Orders
-            </button>
           </div>
         </div>
         
@@ -145,7 +138,6 @@ const Orders = () => {
                       key={order.id} 
                       className="hover:bg-surface-50 dark:hover:bg-surface-900 cursor-pointer"
                       onClick={() => navigate(activeTab === 'purchase' ? `/purchase-order/${order.id}` : `/sales-order/${order.id}`)}
-                    >
       id: "PO-2023-004", 
                       <td className="px-6 py-4 whitespace-nowrap">
                         {activeTab === 'purchase' ? order.supplier.name : order.customer.name}
@@ -231,7 +223,7 @@ const Orders = () => {
       return sortDirection === 'asc' ? comparison : -comparison;
     });
 
-  const handleOpenOrderDetails = (order) => {
+  const handleOpenOrderDetails = (order, event) => {
     setSelectedOrder(order);
     setIsOrderDetailsOpen(true);
     setNewStatus(order.status);
@@ -273,7 +265,6 @@ const Orders = () => {
       } catch (error) {
         showNotification('Failed to update order status', 'error');
       }
-      
       setPurchaseOrders(updatedOrders);
       setSelectedOrder({ ...selectedOrder, status: newStatus });
       setIsEditingStatus(false);
@@ -310,7 +301,7 @@ const Orders = () => {
           <p className="text-surface-600 dark:text-surface-400">
             Create and manage purchase orders with your suppliers. Track order status and delivery details.
           </p>
-        </header>
+    </header>
 
         {/* Main content */}
         <main className="glass-card">
@@ -362,6 +353,30 @@ const Orders = () => {
                 <PlusIcon className="h-5 w-5" />
                 <span>New Order</span>
               </Link>
+            </div>
+          </div>
+          
+          {/* Order Type Tabs */}
+          <div className="border-b border-surface-200 dark:border-surface-700 mb-6">
+            <div className="flex space-x-8">
+              <button 
+                onClick={() => setActiveTab('purchase')}
+                className={`py-3 font-medium flex items-center ${activeTab === 'purchase' 
+                  ? 'border-b-2 border-primary text-primary' 
+                  : 'text-surface-600 dark:text-surface-400'}`}
+              >
+                <ClipboardIcon className="w-4 h-4 mr-2" />
+                Purchase Orders
+              </button>
+              <button 
+                onClick={() => setActiveTab('sales')}
+                className={`py-3 font-medium flex items-center ${activeTab === 'sales' 
+                  ? 'border-b-2 border-primary text-primary' 
+                  : 'text-surface-600 dark:text-surface-400'}`}
+              >
+                <UsersIcon className="w-4 h-4 mr-2" />
+                Sales Orders
+              </button>
             </div>
           </div>
 
@@ -448,7 +463,7 @@ const Orders = () => {
                   <tr>
                     <td colSpan="7" className="px-4 py-8 text-center text-surface-600 dark:text-surface-400">
                       <ClipboardIcon className="mx-auto h-12 w-12 text-surface-400 dark:text-surface-600 mb-2" />
-                      <p className="text-lg font-medium text-surface-900 dark:text-white mb-1">No purchase orders found</p>
+                      <p className="text-lg font-medium text-surface-900 dark:text-white mb-1">No {activeTab === 'purchase' ? 'purchase' : 'sales'} orders found</p>
                       <p className="mb-4">No orders match your current filters</p>
                       <button
                         onClick={() => {
@@ -489,7 +504,7 @@ const Orders = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => handleOpenOrderDetails(order)}
+                            onClick={(e) => { e.stopPropagation(); handleOpenOrderDetails(order, e); }}
                             className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors flex items-center gap-1"
                             title="View details"
                           >
@@ -497,7 +512,7 @@ const Orders = () => {
                           </button>
                           <button
                             onClick={() => {
-                              handleOpenOrderDetails(order);
+                              handleOpenOrderDetails(order, event);
                               setIsEditingStatus(true);
                               setNewStatus(order.status);
                               setStatusNote('');
@@ -539,7 +554,7 @@ const Orders = () => {
                   {isEditingStatus ? (
                     <div className="flex items-center">
                       <select
-                        value={newStatus}
+                        value={newStatus || ''}
                         onChange={handleStatusChange}
                           className="w-full mb-2 text-sm rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:ring-primary focus:border-primary py-1 pl-2 pr-8"
                       >
@@ -564,12 +579,11 @@ const Orders = () => {
                         <div className="flex justify-end gap-2">
                           <button onClick={() => setIsEditingStatus(false)} className="text-surface-600 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-300">Cancel</button>
                           <button onClick={handleUpdateStatus}
-                          
                         className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                         title="Save status"
                       >
                         <SaveIcon className="h-5 w-5" />
-                      </button>
+                           </button>
                     </div>
                   ) : (
                       <><PurchaseOrderStatusBadge status={selectedOrder.status} /></>
