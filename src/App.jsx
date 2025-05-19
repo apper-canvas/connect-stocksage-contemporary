@@ -6,6 +6,8 @@ import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 
+import PurchaseOrderWizard from './components/PurchaseOrderWizard';
+
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark' || 
@@ -59,6 +61,7 @@ function App() {
       
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/purchase-order/create" element={<PurchaseOrderWizard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

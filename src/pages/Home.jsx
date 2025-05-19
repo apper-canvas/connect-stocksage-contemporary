@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { toast } from 'react-toastify'; 
 import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
 
@@ -14,6 +14,7 @@ const ArrowUpIcon = getIcon('arrow-up');
 const ArrowDownIcon = getIcon('arrow-down');
 const GaugeIcon = getIcon('gauge');
 const SearchIcon = getIcon('search');
+const ClipboardIcon = getIcon('clipboard-list');
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -69,6 +70,10 @@ const Dashboard = () => {
         return <TabIcon className="h-5 w-5" />;
       }
     });
+  };
+  
+  const navigateToPurchaseOrderWizard = () => {
+    window.location.href = '/purchase-order/create';
   };
 
   return (
@@ -219,8 +224,12 @@ const Dashboard = () => {
                     <h2 className="text-xl font-semibold text-surface-900 dark:text-white">
                       Purchase Orders
                     </h2>
-                    <button className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                      Create Order
+                    <button 
+                      onClick={navigateToPurchaseOrderWizard}
+                      className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <ClipboardIcon className="h-5 w-5" />
+                      <span>Create Order</span>
                     </button>
                   </div>
                   
