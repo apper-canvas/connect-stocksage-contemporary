@@ -154,7 +154,6 @@ const Dashboard = () => {
     }
   ];
   
-  const [sortDirection, setSortDirection] = useState('asc');
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800">
       {/* Side Navigation */}
