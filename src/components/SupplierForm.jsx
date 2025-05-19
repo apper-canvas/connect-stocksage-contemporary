@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getIcon } from '../utils/iconUtils';
 
-const xIcon = getIcon('x');
-const plusIcon = getIcon('plus');
-const minusIcon = getIcon('minus');
+const XIcon = getIcon('x');
+const PlusIcon = getIcon('plus');
+const MinusIcon = getIcon('minus');
 
 const SupplierForm = ({ supplier = null, onSubmit, onCancel }) => {
   const isEditing = !!supplier;
@@ -222,7 +222,7 @@ const SupplierForm = ({ supplier = null, onSubmit, onCancel }) => {
                   onClick={() => handleRemoveCategory(category)}
                   className="ml-1 text-primary-dark hover:text-primary-dark focus:outline-none"
                 >
-                  <xIcon className="h-4 w-4" />
+                  <XIcon className="h-4 w-4" />
                 </button>
               </span>
             ))}
@@ -241,7 +241,7 @@ const SupplierForm = ({ supplier = null, onSubmit, onCancel }) => {
               onClick={handleAddCategory}
               className="px-3 py-2 bg-primary text-white rounded-r-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
-              <plusIcon className="h-5 w-5" />
+              <PlusIcon className="h-5 w-5" />
             </button>
           </div>
           {errors.categories && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.categories}</p>}
