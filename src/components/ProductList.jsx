@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; 
 import { getIcon } from '../utils/iconUtils';
 import { useProducts } from '../context/ProductContext';
 
@@ -19,8 +19,10 @@ const MapPinIcon = getIcon('map-pin');
 const CalendarIcon = getIcon('calendar');
 const BarChartIcon = getIcon('bar-chart');
 const PencilIcon = getIcon('pencil');
+const EyeIcon = getIcon('eye');
 const TrashIcon = getIcon('trash');
 
+import { useNavigate, useLocation } from 'react-router-dom';
 const ProductList = ({ onEditProduct }) => {
   const { 
     filteredProducts, 
@@ -45,14 +47,21 @@ const ProductList = ({ onEditProduct }) => {
     setSortDirection
   } = useProducts();
 
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  
+  // Check if edit mode is requested via URL
+  const urlParams = new URLSearchParams(location.search);
+  const editProductId = urlParams.get('edit');
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
   const resetFilters = () => {
+    // Reset all filters
     setSearchQuery('');
     setCategoryFilter('');
     setLocationFilter('');
@@ -65,12 +74,14 @@ const ProductList = ({ onEditProduct }) => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
 
-  const viewProductDetails = (product) => {
-    setSelectedProduct(product);
+  const viewProductDetails = (productId) => {
+    navigate(`/products/${productId}`);
   };
 
-  const closeProductDetails = () => {
-    setSelectedProduct(null);
+  // Check if we need to edit a product based on URL parameter
+  if (editProductId && !selectedProduct) {
+    const productToEdit = products.find(p => p.id === parseInt(editProductId));
+    if (productToEdit) onEditProduct(productToEdit);
   };
 
   const activeFiltersCount = [
@@ -362,7 +373,7 @@ const ProductList = ({ onEditProduct }) => {
                   <tr 
                     key={product.id} 
                     className="hover:bg-surface-50 dark:hover:bg-surface-700 cursor-pointer transition-colors"
-                    onClick={() => viewProductDetails(product)}
+                    onClick={() => viewProductDetails(product.id)}
                   >
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-surface-900 dark:text-white">{product.name}</div>
@@ -378,7 +389,16 @@ const ProductList = ({ onEditProduct }) => {
                           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                           title="Edit product"
                         >
-                          <PencilIcon className="h-4 w-4" />
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            viewProductDetails(product.id);
+                          }}
+                          className="text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary ml-2"
+                        >
+                          <EyeIcon className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
@@ -411,65 +431,6 @@ const ProductList = ({ onEditProduct }) => {
                   </tr>
                 );
               })
-            )}
-          </tbody>
-        </table>
-      </div>
-      
-      {/* Product Details Modal */}
-      {selectedProduct && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-surface-900 bg-opacity-75 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-surface-800 rounded-lg max-w-lg w-full p-6 shadow-xl relative">
-            <button 
-              onClick={closeProductDetails}
-              className="absolute top-4 right-4 text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
-            >
-              <XIcon className="h-5 w-5" />
-            </button>
-            
-            <h3 className="text-xl font-semibold text-surface-900 dark:text-white mb-4">{selectedProduct.name}</h3>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between border-b border-surface-200 dark:border-surface-700 pb-2">
-                <span className="text-surface-600 dark:text-surface-400">SKU:</span>
-                <span className="text-surface-900 dark:text-white font-medium">{selectedProduct.sku}</span>
-              </div>
-              
-              <div className="flex justify-between border-b border-surface-200 dark:border-surface-700 pb-2">
-                <span className="text-surface-600 dark:text-surface-400">Category:</span>
-                <span className="text-surface-900 dark:text-white font-medium">{selectedProduct.category}</span>
-              </div>
-              
-              <div className="flex justify-between border-b border-surface-200 dark:border-surface-700 pb-2">
-                <span className="text-surface-600 dark:text-surface-400">Stock Level:</span>
-                <span className="text-surface-900 dark:text-white font-medium">{selectedProduct.stock} units</span>
-              </div>
-              
-              <div className="flex justify-between border-b border-surface-200 dark:border-surface-700 pb-2">
-                <span className="text-surface-600 dark:text-surface-400">Batch Number:</span>
-                <span className="text-surface-900 dark:text-white font-medium">{selectedProduct.batchNumber}</span>
-              </div>
-              
-              <div className="flex justify-between border-b border-surface-200 dark:border-surface-700 pb-2">
-                <span className="text-surface-600 dark:text-surface-400">Expiry Date:</span>
-                <span className="text-surface-900 dark:text-white font-medium">
-                  {new Date(selectedProduct.expiryDate).toLocaleDateString()}
-                </span>
-              </div>
-              
-              <div className="flex justify-between border-b border-surface-200 dark:border-surface-700 pb-2">
-                <span className="text-surface-600 dark:text-surface-400">Storage Location:</span>
-                <span className="text-surface-900 dark:text-white font-medium">{selectedProduct.location}</span>
-              </div>
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={closeProductDetails}
-                className="px-4 py-2 bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
