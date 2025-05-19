@@ -263,12 +263,6 @@ const Dashboard = () => {
                   {/* Main product list with filters */}
                   <ProductList onEditProduct={toggleProductModal} />
                   
-                  <div className="flex justify-end mb-6">
-                    <button onClick={toggleProductModal} className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-                      <PlusIcon className="h-5 w-5" />
-                      <span>Add New Product</span>
-                    </button>
-                  </div>
                   
                   {/* Product form modal */}
                   {isProductModalOpen && (
